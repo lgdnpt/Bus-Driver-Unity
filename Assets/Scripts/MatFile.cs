@@ -18,6 +18,7 @@ namespace fs {
         public float tint_opacity = 0.5f;
         public float[] tint;// = new float[3] { 1.0f,1.0f,1.0f };
 
+        //mat缓存库
         public static Dictionary<string,Material> lib=new Dictionary<string,Material>();
 
         public MatFile(string path) {
@@ -46,6 +47,10 @@ namespace fs {
                     texturePath=new string[1];
                     reader.keys.TryGetValue("texture",out temp);
                     texturePath[0]=temp.Substring(1,temp.Length-2);
+                    if(!texturePath[0].Contains("/")) {
+                        Debug.Log("修正相对路径");
+                        texturePath[0]=path.Substring(0,path.LastIndexOf('/')+1)+texturePath[0];
+                    }
                 }
             }
 /*          texture=new TobjFile[texturePath.Length];

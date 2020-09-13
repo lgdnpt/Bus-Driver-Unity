@@ -197,8 +197,11 @@ public class GlobalClass : Singleton<GlobalClass> {
             return gamePath;
         }
     }
+
+
+
     public static string GetBasePath() {
-        return GetGamePath()+"/base";
+        return "./base";
     }
 
     public static IEnumerator DelayToInvokeDo(Action action,float delaySeconds) {

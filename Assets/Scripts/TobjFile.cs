@@ -49,7 +49,7 @@ namespace fs {
                 Debug.LogError("异常发生在tobj:"+path+"\n"+e);
             }
         }
-        public void Read(BinaryReader br) {
+        private void Read(BinaryReader br) {
             commonHead=br.ReadUInt32();
             unint0=br.ReadUInt32();
             unint1=br.ReadUInt32();
@@ -87,7 +87,7 @@ namespace fs {
             texture=LoadTexture();
         }
 
-        Texture LoadTexture() {
+        private Texture LoadTexture() {
             Texture texture;
             if(!string.IsNullOrEmpty(path)) {
                 if(path.IndexOf('/')==-1) {
