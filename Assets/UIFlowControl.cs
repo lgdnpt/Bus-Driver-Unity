@@ -61,14 +61,9 @@ public class UIFlowControl : MonoBehaviour {
         dic.TryGetValue("src",out string imageSrc);
         dic.TryGetValue("color",out string imageColor);*/
         Match matchImg = Regex.Match(tag,@"<img[^>]*?>");
-        Debug.LogWarning(matchImg.Value);
-        Match matchSrc = Regex.Match(matchImg.ToString(),"src=[^>]*?(\\s|>)");
-        Debug.LogWarning(matchSrc.Value);
-        Match matchColor = Regex.Match(matchImg.ToString(),"color=[^>]*?(\\s|>)");
-        Debug.LogWarning(matchColor.Value);
 
-        string imageSrc = matchSrc.Value;
-        string imageColor = matchColor.Value;
+        string imageSrc = Regex.Match(matchImg.ToString(),"src=[^>]*?(\\s|>)").Value;
+        string imageColor = Regex.Match(matchImg.ToString(),"color=[^>]*?(\\s|>)").Value;
 
         if(!string.IsNullOrEmpty(imageSrc)) {
             imageSrc = imageSrc.Substring(4,imageSrc.Length-5);
