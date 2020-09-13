@@ -12,7 +12,7 @@ public class LoadWorld : MonoBehaviour {
     public RoadLook[] road;
     public TerrainProfile[] terProfile;
 
-    private BusDriverFile.DefReader def;
+    private fs.DefReader def;
     private string temp;
     GameObject lib;
     void Start() {
@@ -50,7 +50,7 @@ public class LoadWorld : MonoBehaviour {
     }
 
     void LoadModel() {
-        def = new BusDriverFile.DefReader(GlobalClass.GetBasePath() + "/def/world/model.def");
+        def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/model.def");
 
         def.keys.TryGetValue("model_count",out temp);
         int modelCount = int.Parse(temp);
@@ -76,7 +76,7 @@ public class LoadWorld : MonoBehaviour {
     }
 
     void LoadPrefab() {
-        def = new BusDriverFile.DefReader(GlobalClass.GetBasePath() + "/def/world/prefab.def");
+        def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/prefab.def");
         def.keys.TryGetValue("prefab_count",out temp);
         int prefabCount = int.Parse(temp);
         prefab=new GameObject[prefabCount];
@@ -96,7 +96,7 @@ public class LoadWorld : MonoBehaviour {
     }
 
     void LoadRoadLook() {
-        def = new BusDriverFile.DefReader(GlobalClass.GetBasePath() + "/def/world/road.def");
+        def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/road.def");
         def.keys.TryGetValue("road_look_count",out temp);
         int roadLookCount = int.Parse(temp);
         road=new RoadLook[roadLookCount];
@@ -143,7 +143,7 @@ public class LoadWorld : MonoBehaviour {
     }
 
     void LoadTerrain() {
-        def = new BusDriverFile.DefReader(GlobalClass.GetBasePath() + "/def/world/terrain.def");
+        def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/terrain.def");
         def.keys.TryGetValue("profile_count",out temp);
         int count = int.Parse(temp);
         terProfile=new TerrainProfile[count];

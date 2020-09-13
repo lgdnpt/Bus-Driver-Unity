@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace BusDriverFile {
+namespace fs {
     public class SiiNunit {
         public Dictionary<string,Unit> unit;
         public Dictionary<string,Unit> root;
@@ -11,7 +11,7 @@ namespace BusDriverFile {
         public SiiNunit(string path) {
             unit=new Dictionary<string,Unit>();
             StreamReader sr = new StreamReader(path);
-            string temp= sr.ReadLine();
+            string temp = sr.ReadLine();
             if(temp.Contains("SiiNunit")) {
                 if(!temp.Contains("{")) {
                     temp=sr.ReadLine();
@@ -36,7 +36,7 @@ namespace BusDriverFile {
 
                 string cName = sbName.ToString().Replace("\n","").Replace("\r","");
 
-                string detail=null;
+                string detail = null;
                 if(t == '{') {
                     //开始unit
                     StringBuilder sb = new StringBuilder();
@@ -100,7 +100,7 @@ namespace BusDriverFile {
             if(string.IsNullOrEmpty(total)) return null;
             string[] ts = total.Split('\n');
             string temp;
-            Dictionary<string,string> keys =new Dictionary<string,string>();
+            Dictionary<string,string> keys = new Dictionary<string,string>();
             for(int i = 0;i<ts.Length;i++) {
                 temp=ts[i];
                 if(temp.Contains("#")) {

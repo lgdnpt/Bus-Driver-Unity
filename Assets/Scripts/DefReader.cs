@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace BusDriverFile {
+namespace fs {
     public class DefReader {
         public Dictionary<string,string> keys;
         public DefReader(string path) {

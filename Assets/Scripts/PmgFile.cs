@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace BusDriverFile {
+namespace fs {
     class PmgFile {
         //header
         public byte version;  //0x11

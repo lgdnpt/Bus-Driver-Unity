@@ -1,4 +1,4 @@
-﻿namespace BusDriverFile {
+﻿namespace fs {
     public class NodeBoundData {
         public Float3 bound_1;
         public float bound_1a;

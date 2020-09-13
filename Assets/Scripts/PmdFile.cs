@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace BusDriverFile {
+namespace fs {
     class PmdFile {
         public uint version;
 

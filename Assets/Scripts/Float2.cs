@@ -1,4 +1,4 @@
-﻿namespace BusDriverFile {
+﻿namespace fs {
     public class Float2 {
         public float x;
         public float y;

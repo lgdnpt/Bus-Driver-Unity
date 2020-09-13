@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using BusDriverFile;
+using fs;
 
 public class Bezier : MonoBehaviour {
     [System.Serializable]
