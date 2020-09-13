@@ -42,7 +42,7 @@ namespace fs {
         public static Dictionary<string,TobjFile> lib = new Dictionary<string,TobjFile>();
         public TobjFile(string path) {
             try {
-                BinaryReader br = new BinaryReader(new FileStream(GlobalClass.GetBasePath() + path,FileMode.Open));
+                BinaryReader br = new BinaryReader(new FileStream(G.BasePath + path,FileMode.Open));
                 Read(br);
                 br.Close();
             }catch(Exception e) {
@@ -97,13 +97,13 @@ namespace fs {
                 path=path.Replace("\0","");
                 Debug.Log("读取纹理:"+path);
                 try {
-                    texture = Dummiesman.DDSLoader.Load(GlobalClass.GetBasePath() + path);
+                    texture = (new DDSFile(G.BasePath+path)).Texture;//Dummiesman.DDSLoader.Load(GlobalClass.GetBasePath() + path);
                     return texture;
                 } catch(Exception e) {
                     Debug.LogError("DDS("+path+")读取错误:\n"+e);
                 }
             } else {
-                Debug.LogWarning("空纹理路径:tobj路径"+tobjPath);
+                Debug.LogWarning("空纹理路径:tobj("+tobjPath+")");
             }
             return null;
         }

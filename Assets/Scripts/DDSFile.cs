@@ -7,15 +7,16 @@ using UnityEngine;
 namespace fs {
     class DDSFile {
         public string ddsPath;
-        //header
-        public uint dwMagic; //0x20534444
+
+        public uint dwMagic;
         public DDS_HEADER header;
 
-        public Texture texture;
+        public Texture Texture {get => texture; set => texture=Texture;}
+        private Texture texture;
 
         public DDSFile(string path) {
             try {
-                BinaryReader br = new BinaryReader(new FileStream(G.BasePath + path,FileMode.Open));
+                BinaryReader br = new BinaryReader(new FileStream(path,FileMode.Open));
                 Read(br);
                 br.Close();
             } catch(Exception e) {
@@ -29,27 +30,20 @@ namespace fs {
             header=new DDS_HEADER(br);
             if(header.dwSize!=0x7C) throw new Exception("Invalid DDS header. Structure length is incrrrect.");
 
-
             bool mipmaps = header.dwMipMapCount > 0;
             TextureFormat textureFormat;
-            int dataSize;
             switch(header.ddspf.dwFourCC) {
                 case 0x0: {
                     //无压缩
                     if(header.ddspf.dwABitMask==0) {
                         textureFormat=TextureFormat.RGB24;
-                        //dataSize=
-                        Debug.Log("RGB24");
                     } else if(header.ddspf.dwABitMask==0xFF) {
                         textureFormat=TextureFormat.ARGB32;
-                        Debug.Log("ARGB32");
                     } else {
                         if(header.ddspf.dwRBitMask==0xFF) {
                             textureFormat=TextureFormat.RGBA32;
-                            Debug.Log("RGBA32");
                         } else {
                             textureFormat=TextureFormat.BGRA32;
-                            Debug.Log("BGRA32");
                         }
                     }
                 } break;
@@ -64,19 +58,21 @@ namespace fs {
                 default: throw new Exception("Cannot load DDS due to an unsupported pixel format.");
             }
 
-            byte[] dxtBytes = new byte[br.BaseStream.Length-br.BaseStream.Position]; // new byte[ddsBytes.Length - DDS_HEADER_SIZE];
-            //Buffer.BlockCopy(ddsBytes,DDS_HEADER_SIZE,dxtBytes,0,ddsBytes.Length - DDS_HEADER_SIZE);
-            int i = 0;
-            while(br.BaseStream.Position<br.BaseStream.Length) {
-                dxtBytes[i]=br.ReadByte();
-                i++;
+            try {
+                byte[] dxtBytes = new byte[br.BaseStream.Length-br.BaseStream.Position];
+                int i = 0;
+                while(br.BaseStream.Position<br.BaseStream.Length) {
+                    dxtBytes[i]=br.ReadByte();
+                    i++;
+                }
+                Texture2D texture2 = new Texture2D((int)header.dwWidth,(int)header.dwHeight,textureFormat,mipmaps);
+                texture2.LoadRawTextureData(dxtBytes);
+                texture2.Apply();
+
+                texture=texture2;
+            } catch(Exception ex) {
+                throw new Exception("An error occured while loading DirectDraw Surface: " + ex.Message);
             }
-
-            Texture2D texture2 = new Texture2D((int)header.dwWidth,(int)header.dwHeight,textureFormat,mipmaps);
-            texture2.LoadRawTextureData(dxtBytes);
-            texture2.Apply();
-
-            texture=texture2;
         }
 
 
@@ -105,9 +101,7 @@ namespace fs {
                 dwDepth = br.ReadUInt32();
                 dwMipMapCount = br.ReadUInt32();
                 dwReserved1=new uint[11];
-                for(int i = 0;i<11;i++) {
-                    dwReserved1[i]=br.ReadUInt32();
-                }
+                for(int i = 0;i<11;i++)  dwReserved1[i]=br.ReadUInt32();
                 ddspf = new DDS_PIXELFORMAT(br);
                 dwCaps = br.ReadUInt32();
                 dwCaps2 = br.ReadUInt32();
@@ -146,10 +140,6 @@ namespace fs {
                 dwABitMask = br.ReadUInt32();
             }
         }
-
-
-
-
 
         public enum DXGI_FORMAT {
             DXGI_FORMAT_UNKNOWN,
