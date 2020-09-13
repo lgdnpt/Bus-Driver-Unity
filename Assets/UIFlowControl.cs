@@ -16,8 +16,14 @@ public class UIFlowControl : MonoBehaviour {
         
     }
 
+    public void test() {
+
+        DDSFile dds = new DDSFile("/material/ui/intro/background.dds");
+        print(dds.dwMagic);
+    }
+
     public void LoadIntro() {
-        SiiNunit sii = new SiiNunit(G.I.BasePath + "/ui/intro.sii");
+        SiiNunit sii = new SiiNunit(G.BasePath + "/ui/intro.sii");
 
         sii.unit.TryGetValue(".entity1",out SiiNunit.Unit unit);
         if(unit!=null) {
@@ -37,12 +43,14 @@ public class UIFlowControl : MonoBehaviour {
             dic.TryGetValue("src",out string imageSrc);
             dic.TryGetValue("color",out string imageColor);
 
-            print(G.I.BasePath+imageSrc);
+            print(G.BasePath+imageSrc);
             print(imageColor);
 
             MatFile mat = new MatFile(imageSrc);
-            TobjFile tobj = new TobjFile(mat.texturePath[0]);
-            background.texture=tobj.texture;
+            //TobjFile tobj = new TobjFile(mat.texturePath[0]);
+            //background.texture=tobj.texture;
+            DDSFile dds = new DDSFile("/material/ui/intro/background.dds");
+            background.texture=dds.texture;
 
         } else {
             print("null");

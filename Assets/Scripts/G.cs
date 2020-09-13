@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 class G:Singleton<G>{
-    public string BasePath {
+    public static string BasePath {
         get {
             if(string.IsNullOrEmpty(basePath)) {
                 return basePath = "./base";
@@ -14,5 +14,5 @@ class G:Singleton<G>{
         }
         set => basePath = BasePath;
     }
-    private string basePath;
+    private static string basePath;
 }
