@@ -11,6 +11,7 @@
 /[Mm]emoryCaptures/
 
 base/
+Assets/testbase/
 
 *.fbx
 *.obj

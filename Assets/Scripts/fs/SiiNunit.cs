@@ -51,7 +51,7 @@ namespace fs {
                 int ind = cName.LastIndexOf(':');
                 string className = cName.Substring(0,ind).Trim();
                 Dictionary<string,string> dic = GetKeyValues(detail);
-                System.Diagnostics.Debug.WriteLine(className);
+                //System.Diagnostics.Debug.WriteLine(className);
                 Unit a;
                 switch(className) {
                     case "ui::window": a = new UI_Window(); break;
@@ -136,7 +136,8 @@ namespace fs {
         }
         public class CommonUnit:Unit {
             public override void Init(Dictionary<string,Unit> unit) {
-                System.Diagnostics.Debug.WriteLine("未知类");
+                //System.Diagnostics.Debug.WriteLine("未知类");
+                throw new Exception("Unknown class");
             }
         }
 
@@ -175,7 +176,8 @@ namespace fs {
                     if(unit.TryGetValue(temp,out Unit aa)) {
                         myChildren.Add(aa);
                     } else {
-                        System.Diagnostics.Debug.WriteLine("缺失unit");
+                        //System.Diagnostics.Debug.WriteLine("缺失unit");
+                        throw new Exception("Missing unit");
                     }
                     i++;
                 }
