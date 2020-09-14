@@ -14,13 +14,14 @@ namespace ui {
             fc = G.I.flowControl;
         }
 
+        RawImage black;
         public void Load() {
             fc.LoadUIImage(sii,".entity7");  //rating
             fc.LoadUIImage(sii,".entity5");  //brand
 
             RawImage bg = fc.LoadUIImage(sii,".entity3");  //bg
 
-            RawImage black = fc.LoadUIImage(sii,".entity9");  //black
+            black = fc.LoadUIImage(sii,".entity9");  //black
             Hashtable args = new Hashtable {
                 { "color",Color.clear },
                 { "time",1.6167f },
@@ -70,37 +71,79 @@ namespace ui {
             RawImage bus = fc.LoadUIImage(sii,".entity18"); //bus
             RawImage title_driver = fc.LoadUIImage(sii,".entity19"); //title_driver
 
-            RectTransform rt = towers.GetComponent<RectTransform>();
-            Vector3 vector = new Vector3(rt.position.x,rt.position.y,rt.position.z);
-
+            RectTransform rt;
+            rt = towers.GetComponent<RectTransform>();
             Hashtable args = new Hashtable {
-                {"time",2f },
-                {"position",vector},
+                {"time",1.9667f },
+                {"delay",0.21f },
+                {"position",rt.position},
                 {"oncomplete", "DrawEnd" },
                 {"onCompleteTarget", gameObject },
-                {"easetype", iTween.EaseType.linear}
+                {"easetype", iTween.EaseType.easeInOutQuad}
             };
             rt.anchoredPosition=new Vector2(rt.anchoredPosition.x-(rt.anchoredPosition.x+rt.rect.width),rt.anchoredPosition.y);
             iTween.MoveTo(towers.gameObject,args);
 
             rt = title_bus.GetComponent<RectTransform>();
-            vector = new Vector3(rt.position.x,rt.position.y,rt.position.z);
             args = new Hashtable {
-                {"time",2f },
-                {"position",vector},
+                {"time",1.9667f },
+                {"delay",0.21f },
+                {"position",rt.position},
                 {"oncomplete", "DrawEnd" },
                 {"onCompleteTarget", gameObject },
-                {"easetype", iTween.EaseType.linear}
+                {"easetype", iTween.EaseType.easeInOutQuad}
             };
             rt.anchoredPosition=new Vector2(rt.anchoredPosition.x-(rt.anchoredPosition.x+rt.rect.width),rt.anchoredPosition.y);
             iTween.MoveTo(title_bus.gameObject,args);
 
 
+            rt = bus.GetComponent<RectTransform>();
+            args = new Hashtable {
+                {"time",1.7333f },
+                {"delay",0.2f },
+                {"position",rt.position},
+                {"oncomplete", "DrawEnd" },
+                {"onCompleteTarget", gameObject },
+                {"easetype", iTween.EaseType.easeInOutQuad}
+            };
+            rt.anchoredPosition=new Vector2(rt.anchoredPosition.x+(1920-rt.anchoredPosition.x),rt.anchoredPosition.y);
+            iTween.MoveTo(bus.gameObject,args);
+
+            rt = title_driver.GetComponent<RectTransform>();
+            args = new Hashtable {
+                {"time",1.7333f },
+                {"delay",0.2f },
+                {"position",rt.position},
+                {"oncomplete", "DrawEnd" },
+                {"onCompleteTarget", gameObject },
+                {"easetype", iTween.EaseType.easeInOutQuad}
+            };
+            rt.anchoredPosition=new Vector2(rt.anchoredPosition.x+(1920-rt.anchoredPosition.x),rt.anchoredPosition.y);
+            iTween.MoveTo(title_driver.gameObject,args);
+
+
+
             RawImage scs_game = fc.LoadUIImage(sii,".entity13"); //scs_game
+            rt = scs_game.GetComponent<RectTransform>();
+            args = new Hashtable {
+                {"time",1.1167f },
+                {"delay",1.333f },
+                {"position",rt.position},
+                {"oncomplete", "DrawEnd" },
+                {"onCompleteTarget", gameObject },
+                {"easetype", iTween.EaseType.easeInOutQuad}
+            };
+            rt.anchoredPosition=new Vector2(rt.anchoredPosition.x+(1920-rt.anchoredPosition.x),rt.anchoredPosition.y);
+            iTween.MoveTo(scs_game.gameObject,args);
         }
 
         void DrawEnd() {
-
+            Hashtable args = new Hashtable {
+                { "color",Color.black },
+                { "time",1.6167f },
+                { "delay",2.3f }
+            };
+            iTween.ColorTo(black.gameObject,args);
         }
     }
 }
