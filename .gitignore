@@ -12,6 +12,7 @@
 
 base/
 Assets/testbase/
+Assets/Fonts/
 
 *.fbx
 *.obj
