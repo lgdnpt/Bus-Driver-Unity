@@ -65,9 +65,15 @@ namespace fs {
                     dxtBytes[i]=br.ReadByte();
                     i++;
                 }
+                //Array.Reverse(dxtBytes);
+
+
+
                 Texture2D texture2 = new Texture2D((int)header.dwWidth,(int)header.dwHeight,textureFormat,mipmaps);
                 texture2.LoadRawTextureData(dxtBytes);
                 texture2.Apply();
+                
+
 
                 texture=texture2;
             } catch(Exception ex) {

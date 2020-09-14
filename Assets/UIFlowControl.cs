@@ -29,6 +29,11 @@ public class UIFlowControl : MonoBehaviour {
         //sii.unit.TryGetValue(".entity3",out SiiNunit.Unit unit);
         LoadUIImage(sii,".entity3");
         LoadUIImage(sii,".entity11");
+        LoadUIImage(sii,".entity13");
+        LoadUIImage(sii,".entity15");
+        LoadUIImage(sii,".entity16");
+        LoadUIImage(sii,".entity18");
+        LoadUIImage(sii,".entity19");
     }
 
     void LoadUIImage(SiiNunit sii, string unitName) {
@@ -42,8 +47,19 @@ public class UIFlowControl : MonoBehaviour {
 
             SiiNunit.UI_Text ui = (SiiNunit.UI_Text)unit;
             RawImage imgBg = Instantiate(rawImage,canvas.transform);
-            ApplyCoords(imgBg.rectTransform,ui);
+
             ApplyImageWithImgTag(imgBg,itemText);
+
+            Match matchAlign = Regex.Match(itemText,@"<align[^>]*?>");
+            if(!string.IsNullOrEmpty(matchAlign.Value)) {
+                //居中
+                Debug.LogWarning("居中"+itemText);
+                print(imgBg.texture.width);
+                print(imgBg.texture.height);
+                ApplyCoordsCenter(imgBg.rectTransform,ui,imgBg.texture.width,imgBg.texture.height);
+            } else {
+                ApplyCoords(imgBg.rectTransform,ui);
+            }
 
         } else {
             print("null");
@@ -60,8 +76,8 @@ public class UIFlowControl : MonoBehaviour {
         }
         dic.TryGetValue("src",out string imageSrc);
         dic.TryGetValue("color",out string imageColor);*/
-        Match matchImg = Regex.Match(tag,@"<img[^>]*?>");
 
+        Match matchImg = Regex.Match(tag,@"<img[^>]*?>");
         string imageSrc = Regex.Match(matchImg.ToString(),"src=[^>]*?(\\s|>)").Value;
         string imageColor = Regex.Match(matchImg.ToString(),"color=[^>]*?(\\s|>)").Value;
 
@@ -83,8 +99,20 @@ public class UIFlowControl : MonoBehaviour {
     }
 
     void ApplyCoords(RectTransform tRT,SiiNunit.UI ui) {
-        tRT.anchoredPosition=new Vector2(ui.coords_l*factor.x,ui.coords_b*factor.y);
+        //上下镜像
+        tRT.rotation = Quaternion.AngleAxis(180,Vector3.right);
+        tRT.anchoredPosition=new Vector2(ui.coords_l*factor.x,/*Screen.height - */(ui.coords_b*factor.y)+(ui.coords_t-ui.coords_b)*factor.y);
+
         tRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,(ui.coords_r-ui.coords_l)*factor.x);
         tRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,(ui.coords_t-ui.coords_b)*factor.y);
+    }
+
+    void ApplyCoordsCenter(RectTransform tRT,SiiNunit.UI ui,int width,int height) {
+        //上下镜像
+        tRT.rotation = Quaternion.AngleAxis(180,Vector3.right);
+        tRT.anchoredPosition=new Vector2( (ui.coords_r+ui.coords_l - width)*factor.x/2f, (ui.coords_t+ui.coords_b-height)*factor.y/2 + height*factor.y);
+
+        tRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,width*factor.x);
+        tRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,height*factor.y);
     }
 }
