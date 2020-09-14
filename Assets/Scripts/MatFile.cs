@@ -23,8 +23,13 @@ namespace fs {
 
         public MatFile(string path) {
             matPath=path;
+            DefReader reader;// = new DefReader(GlobalClass.GetBasePath() + path);
             //获得全部属性
-            DefReader reader = new DefReader(GlobalClass.GetBasePath() + path);
+            try {
+                reader = new DefReader(GlobalClass.GetBasePath() + path);
+            } catch(FileNotFoundException e) {
+                throw e;
+            }
             string temp;
             if(reader.keys.ContainsKey("material")) {
                 reader.keys.TryGetValue("material",out temp);

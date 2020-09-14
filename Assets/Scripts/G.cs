@@ -17,6 +17,8 @@ class G:Singleton<G>{
     }
     private static string basePath;
 
+    public ui.FlowControl flowControl;
+
 
     public static Color HexToABGR(string strHex) {
         if(strHex.Length != 8) return Color.white;
@@ -24,6 +26,6 @@ class G:Singleton<G>{
         byte g = byte.Parse(strHex.Substring(2,2),NumberStyles.HexNumber);
         byte b = byte.Parse(strHex.Substring(3,2),NumberStyles.HexNumber);
         byte r = byte.Parse(strHex.Substring(6,2),NumberStyles.HexNumber);
-        return new Color32(a,g,b,r);
+        return new Color32(r,g,b,a);
     }
 }
