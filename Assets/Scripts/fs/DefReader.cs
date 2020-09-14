@@ -49,7 +49,7 @@ namespace fs {
             byte[] Unicode = new byte[] { 0xFF,0xFE,0x41 };
             byte[] UnicodeBIG = new byte[] { 0xFE,0xFF,0x00 };
             byte[] UTF8 = new byte[] { 0xEF,0xBB,0xBF }; //带BOM
-            Encoding reVal = Encoding.Default;
+            Encoding reVal = Encoding.GetEncoding("GBK");
 
             BinaryReader r = new BinaryReader(fs,System.Text.Encoding.Default);
             int i;

@@ -28,6 +28,11 @@ namespace ui {
             print(matchSrc.ToString());
         }
 
+        public void SetButtonHighlight(RawImage rawImage) {
+            rawImage.color=Color.cyan;
+            print("cnmcnmcnm");
+        }
+
 
 
         public RawImage LoadUIImage(SiiNunit sii,string unitName) {
