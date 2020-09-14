@@ -15,11 +15,15 @@ namespace ui {
         }
 
         RawImage black;
+        public GameObject introGroup;
+
+        Stack<GameObject> tempObjs = new Stack<GameObject>();
+
         public void Load() {
             fc.LoadUIImage(sii,".entity7");  //rating
             fc.LoadUIImage(sii,".entity5");  //brand
 
-            RawImage bg = fc.LoadUIImage(sii,".entity3");  //bg
+            tempObjs.Push(fc.LoadUIImage(sii,".entity3").gameObject);
 
             black = fc.LoadUIImage(sii,".entity9");  //black
             Hashtable args = new Hashtable {
@@ -30,6 +34,7 @@ namespace ui {
             iTween.ColorTo(black.gameObject,args);
 
             RawImage scs = fc.LoadUIImage(sii,".entity11"); //scs
+            tempObjs.Push(scs.gameObject);
             Color colorTemp = scs.color;
             colorTemp.a=0;
             args = new Hashtable {
@@ -51,6 +56,7 @@ namespace ui {
 
         void DrawLine() {
             RawImage line = fc.LoadUIImage(sii,".entity21");     //line
+            tempObjs.Push(line.gameObject);
             RectTransform rt = line.GetComponent<RectTransform>();
             Vector3 vector3 = new Vector3(rt.position.x,rt.position.y,rt.position.z);
 
@@ -65,11 +71,16 @@ namespace ui {
             iTween.MoveTo(line.gameObject,args);
         }
 
+
         void DrawBus() {
             RawImage towers = fc.LoadUIImage(sii,".entity15");    //towers
             RawImage title_bus = fc.LoadUIImage(sii,".entity16"); //title_bus
             RawImage bus = fc.LoadUIImage(sii,".entity18"); //bus
             RawImage title_driver = fc.LoadUIImage(sii,".entity19"); //title_driver
+            tempObjs.Push(towers.gameObject);
+            tempObjs.Push(title_bus.gameObject);
+            tempObjs.Push(bus.gameObject);
+            tempObjs.Push(title_driver.gameObject);
 
             RectTransform rt;
             rt = towers.GetComponent<RectTransform>();
@@ -113,6 +124,7 @@ namespace ui {
             iTween.MoveTo(title_driver.gameObject,args);
             
             RawImage scs_game = fc.LoadUIImage(sii,".entity13"); //scs_game
+            tempObjs.Push(scs_game.gameObject);
             rt = scs_game.GetComponent<RectTransform>();
             args = new Hashtable {
                 {"time",1.1167f },
@@ -131,14 +143,27 @@ namespace ui {
                 { "color",Color.black },
                 { "time",1.6167f },
                 { "delay",2.3f },
+                {"oncomplete", "DestroyImages" },
+                {"onCompleteTarget", gameObject }
+            };
+            iTween.ColorTo(black.gameObject,args);
+        }
+
+        void DestroyImages() {
+            while(tempObjs.Count>0) {
+                Destroy(tempObjs.Pop());
+            }
+            Hashtable args = new Hashtable {
+                {"color",Color.clear },
+                {"time",1.6167f },
                 {"oncomplete", "IntoMainMenu" },
-                {"onCompleteTarget", gameObject },
+                {"onCompleteTarget", gameObject }
             };
             iTween.ColorTo(black.gameObject,args);
         }
 
         void IntoMainMenu() {
-
+            introGroup.SetActive(false);
         }
     }
 }
