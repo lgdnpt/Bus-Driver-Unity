@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class LocalizationManager {
@@ -13,8 +14,35 @@ public class LocalizationManager {
         }
     }
 
-/*    private const string chinese = "zh_cn";
-    private const string english = "en_us";*/
+    public static string GetLocalization(string key) {
+        if(key.Contains("@@")) {
+            key=key.Substring(key.IndexOf("@@")+2);
+            key=key.Substring(0,key.IndexOf("@@"));
+        }
+
+        string str = I.GetValue(key);
+        if(str==null) {
+            Debug.LogError("Can find key"+key);
+            return key;
+        }
+        if(str.Contains("align")) {
+            Match matchAlign = Regex.Match(str,@"<align[^>]*?>");
+            str = matchAlign.Value;
+            str = str.Substring(str.IndexOf(' ')+1,str.IndexOf('>')-str.IndexOf(' ')-1);
+        }
+        if(str.Contains("@@")) {
+            str=str.Substring(str.IndexOf("@@")+2);
+            str=str.Substring(0,str.IndexOf("@@"));
+            str = GetLocalization(str);
+        }
+        if(str.Substring(0,1).Equals("\"") && str.Substring(str.Length-1,1).Equals("\"")) {
+            str=str.Substring(1,str.Length-2);
+        }
+        return str;
+    }
+
+    /*    private const string chinese = "zh_cn";
+        private const string english = "en_us";*/
 
     //选择自已需要的本地语言  
     public string language = "zh_cn";

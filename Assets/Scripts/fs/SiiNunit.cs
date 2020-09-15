@@ -69,6 +69,9 @@ namespace fs {
                     case "options_menu": a = new OptionsMenu(); break;
                     case "shared_menu": a = new SharedMenu(); break;
                     case "mission_selection": a = new MissionSelection(); break;
+                    case "mission": a = new Mission(); break;
+                    case "high_score_data_table": a=new HighScoreDataTable(); break;
+                    case "high_score_data": a=new HighScoreData(); break;
                     default: a= new CommonUnit(); break;
                 };
                 a.className=className;
@@ -115,7 +118,9 @@ namespace fs {
                     int index = temp.IndexOf(':');
                     string keyName = temp.Substring(0,index).Trim();
                     string value = temp.Substring(index+1,temp.Length-index-1).Trim();
-                    keys.Add(keyName,value);
+                    try {
+                        keys.Add(keyName,value);
+                    }catch(ArgumentException) { }
                 }
             }
             return keys;
@@ -148,26 +153,13 @@ namespace fs {
             public int coords_t;
             public override void Init(Dictionary<string,Unit> unit) {
                 string temp;
-                if(item.TryGetValue("coords_b",out temp)) coords_b=GetNum(temp);
-                if(item.TryGetValue("coords_l",out temp)) coords_l=GetNum(temp);
-                if(item.TryGetValue("coords_r",out temp)) coords_r=GetNum(temp);
-                if(item.TryGetValue("coords_t",out temp)) coords_t=GetNum(temp);
+                if(item.TryGetValue("coords_b",out temp)) coords_b=Util.HexToFloat(temp);
+                if(item.TryGetValue("coords_l",out temp)) coords_l=Util.HexToFloat(temp);
+                if(item.TryGetValue("coords_r",out temp)) coords_r=Util.HexToFloat(temp);
+                if(item.TryGetValue("coords_t",out temp)) coords_t=Util.HexToFloat(temp);
 
             }
-            private int GetNum(string temp) {
-                if(temp.IndexOf('&')<0) return int.Parse(temp);
-                else {
-                    temp = temp.Replace("&","");
-                    byte[] bytes = new byte[4];
-                    bytes[0]=Convert.ToByte(temp.Substring(0,2),16);
-                    bytes[1]=Convert.ToByte(temp.Substring(2,2),16);
-                    bytes[2]=Convert.ToByte(temp.Substring(4,2),16);
-                    bytes[3]=Convert.ToByte(temp.Substring(6,2),16);
 
-                    float f = BitConverter.ToSingle(bytes,0);
-                    return (int)f;
-                }
-            }
 
             protected Unit[] GetMyChildren(Dictionary<string,Unit> unit) {
                 List<Unit> myChildren = new List<Unit>();
@@ -407,6 +399,135 @@ namespace fs {
                     unit.TryGetValue(temp,out windowLink);
                 }
             }
+        }
+
+        public class HighScoreDataTable:Unit {
+            public new static readonly string className = "high_score_data_table";
+
+            public override void Init(Dictionary<string,Unit> unit) {
+
+            }
+        }
+
+        public class HighScoreData:Unit {
+            public new static readonly string className = "high_score_data";
+
+            public override void Init(Dictionary<string,Unit> unit) {
+
+            }
+        }
+
+        public class Mission:Unit {
+            public new static readonly string className = "mission";
+            public string controller_type; //{bus_lane_mission_ctrl,prison_mission_ctrl}
+            public string short_desc;
+            public string long_desc;
+            public string map_name;
+            public int time_limit;
+            public int bonus_time_limit;
+            public int sun_idx;
+            public int[] sun_idxs;
+            public int sky_idx;
+            public int[] sky_idxs;
+            public int tier;
+            public int rank;
+            public int overlay_offset_x;
+            public int overlay_offset_y;
+            public string vehicle_data;
+            public string bus_number;
+            public string time_table_name;
+            public int bus_stop_camera;
+            public string[] bus_stop_cameras;
+            public int entering_passenger;
+            public int[] entering_passengers;
+            public int max_leaving_passenger;
+            public int[] max_leaving_passengers;
+            public int driving_time;
+            public int[] driving_times;
+            public int bus_stop_time;
+            public int[] bus_stop_times;
+            public int icon;
+            public string[] icons;
+            public int passenger;
+            public string[] passengers;
+
+            public override void Init(Dictionary<string,Unit> unit) {
+                string temp;
+                if(item.TryGetValue("short_desc",out temp)) short_desc=temp;
+                if(item.TryGetValue("long_desc",out temp)) long_desc=temp;
+                if(item.TryGetValue("tier",out temp)) tier=int.Parse(temp);
+                if(item.TryGetValue("rank",out temp)) rank=int.Parse(temp);
+                if(item.TryGetValue("overlay_offset_x",out temp)) overlay_offset_x=int.Parse(temp);
+                if(item.TryGetValue("overlay_offset_y",out temp)) overlay_offset_y=int.Parse(temp);
+                if(item.TryGetValue("vehicle_data",out temp)) vehicle_data=temp;
+            }
+
+            public void LoadAll() {
+                string temp;
+                if(item.TryGetValue("controller_type",out temp)) controller_type=temp;
+                //if(item.TryGetValue("short_desc",out temp)) short_desc=temp;
+                //if(item.TryGetValue("long_desc",out temp)) long_desc=temp;
+                if(item.TryGetValue("map_name",out temp)) map_name=temp;
+                if(item.TryGetValue("time_limit",out temp)) time_limit=int.Parse(temp);
+                if(item.TryGetValue("bonus_time_limit",out temp)) bonus_time_limit=int.Parse(temp);
+
+                if(item.TryGetValue("sun_idx",out temp)) sun_idx=int.Parse(temp);
+                sun_idxs = new int[sun_idx];
+                for(int i = 0;i<sun_idx;i++) {
+                    if(item.TryGetValue("sun_idx["+i+"]",out temp)) sun_idxs[i]=int.Parse(temp);
+                }
+
+                if(item.TryGetValue("sky_idx",out temp)) sky_idx=int.Parse(temp);
+                sky_idxs = new int[sky_idx];
+                for(int i = 0;i<sky_idx;i++) {
+                    if(item.TryGetValue("sky_idx["+i+"]",out temp)) sky_idxs[i]=int.Parse(temp);
+                }
+
+                //if(item.TryGetValue("tier",out temp)) tier=int.Parse(temp);
+                //if(item.TryGetValue("rank",out temp)) rank=int.Parse(temp);
+                //if(item.TryGetValue("overlay_offset_x",out temp)) overlay_offset_x=int.Parse(temp);
+                //if(item.TryGetValue("overlay_offset_y",out temp)) overlay_offset_y=int.Parse(temp);
+                //if(item.TryGetValue("vehicle_data",out temp)) vehicle_data=temp;
+                if(item.TryGetValue("bus_number",out temp)) bus_number=temp;
+                if(item.TryGetValue("time_table_name",out temp)) time_table_name=temp;
+
+                if(item.TryGetValue("bus_stop_cameras",out temp)) bus_stop_camera=int.Parse(temp);
+                bus_stop_cameras = new string[bus_stop_camera];
+                for(int i = 0;i<bus_stop_camera;i++) {
+                    if(item.TryGetValue("bus_stop_cameras["+i+"]",out temp)) bus_stop_cameras[i]=temp;
+                }
+
+                if(item.TryGetValue("entering_passengers",out temp)) entering_passenger=int.Parse(temp);
+                entering_passengers = new int[entering_passenger];
+                for(int i = 0;i<entering_passenger;i++) {
+                    if(item.TryGetValue("entering_passengers["+i+"]",out temp)) entering_passengers[i]=int.Parse(temp);
+                }
+
+                if(item.TryGetValue("max_leaving_passengers",out temp)) max_leaving_passenger=int.Parse(temp);
+                max_leaving_passengers = new int[max_leaving_passenger];
+                for(int i = 0;i<max_leaving_passenger;i++) {
+                    if(item.TryGetValue("max_leaving_passengers["+i+"]",out temp)) max_leaving_passengers[i]=int.Parse(temp);
+                }
+
+                if(item.TryGetValue("driving_times",out temp)) driving_time=int.Parse(temp);
+                driving_times = new int[driving_time];
+                for(int i = 0;i<driving_time;i++) {
+                    if(item.TryGetValue("driving_times["+i+"]",out temp)) driving_times[i]=int.Parse(temp);
+                }
+
+                if(item.TryGetValue("bus_stop_times",out temp)) bus_stop_time=int.Parse(temp);
+                bus_stop_times = new int[bus_stop_time];
+                for(int i = 0;i<bus_stop_time;i++) {
+                    if(item.TryGetValue("bus_stop_times["+i+"]",out temp)) bus_stop_times[i]=int.Parse(temp);
+                }
+
+                if(item.TryGetValue("passengers",out temp)) passenger=int.Parse(temp);
+                passengers = new string[passenger];
+                for(int i = 0;i<passenger;i++) {
+                    if(item.TryGetValue("passengers["+i+"]",out temp)) passengers[i]=temp;
+                }
+            }
+            
         }
     }
 

@@ -16,25 +16,69 @@ namespace ui {
 
         Vector2 factor;
 
+        public Text infoTitle;
+        public Text infoText;
+        public Text scoreText;
+        public Text[][] block;
+
         public void Start() {
             //factor=new Vector2(Screen.width/1024f,Screen.height/768f);
             factor=new Vector2(1.875f,1.40625f);
         }
 
         public void test() {
-            Match matchImg = Regex.Match("<align hstyle=center vstyle=center><img src=/material/ui/white.mat color=FF000000 xscale=stretch yscale=stretch></align>",@"<img[^>]*?>");
-            Match matchSrc = Regex.Match(matchImg.ToString(),input.text);//"src=[^>]*\\s"
-                                                                         //Match matchColor = Regex.Match(matchImg.ToString(),"color=[^>]*\\s");
-            print(matchSrc.ToString());
+            //Match matchImg = Regex.Match("<align hstyle=center vstyle=center><img src=/material/ui/white.mat color=FF000000 xscale=stretch yscale=stretch></align>",@"<img[^>]*?>");
+            //Match matchSrc = Regex.Match(matchImg.ToString(),input.text);//"src=[^>]*\\s"
+            //Match matchColor = Regex.Match(matchImg.ToString(),"color=[^>]*\\s");
+            //print(matchSrc.ToString());
+
+            string routePath = "/def/route/airport1.sii";
+            SiiNunit routeSii = new SiiNunit(G.BasePath + routePath);
+            string routeFileName = routePath.Substring(routePath.LastIndexOf("/")+1);
+            string savePath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments)+"\\Bus Driver\\save\\"+routeFileName;
+
+
+            SiiNunit.Unit unit;
+            routeSii.unit.TryGetValue("mission.airport1",out unit);
+            SiiNunit.Mission route = (SiiNunit.Mission)unit;
+            print(route.short_desc);
+            print(route.long_desc);
+            infoTitle.text=LocalizationManager.GetLocalization(route.short_desc);
+            infoText.text=LocalizationManager.GetLocalization(route.long_desc);
+            print(route.vehicle_data);
+            print(route.tier);
+            print(route.rank);
+            print(route.overlay_offset_x);
+            print(route.overlay_offset_y);
+
+            SiiNunit saveSii = new SiiNunit(savePath);
+
+            SortedList sortedList = new SortedList();
+            foreach(KeyValuePair<string,SiiNunit.Unit> kvp in saveSii.unit) {
+                if(kvp.Value.className.Equals("high_score_data")) {
+                    kvp.Value.item.TryGetValue("score",out string temp);
+                    if(!string.IsNullOrEmpty(temp) && !temp.Equals("0")) {
+                        sortedList.Add(temp,temp);
+                    }
+                }
+            }
+
+            string scorestr = "<i>";
+            string[] score = new string[3];
+            for(int i = 0;i<3;i++) {
+                if(i<sortedList.Count)
+                    score[i] = sortedList.GetByIndex(i).ToString();
+                else {
+                    score[i] = "";
+                }
+                scorestr+=(i+1)+"."+score[i]+"\n";
+            }
+            scorestr += "</i>";
+            scoreText.text=scorestr;
         }
 
-        public void SetButtonHighlight(RawImage rawImage) {
-            rawImage.color=Color.cyan;
-            print("cnmcnmcnm");
-        }
 
-
-
+        
         public RawImage LoadUIImage(SiiNunit sii,string unitName) {
             sii.unit.TryGetValue(unitName,out SiiNunit.Unit unit);
             if(unit!=null) {
