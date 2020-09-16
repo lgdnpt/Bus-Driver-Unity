@@ -16,15 +16,14 @@ namespace fs {
 
         public DDSFile(string path) {
             try {
-                BinaryReader br = new BinaryReader(new FileStream(path,FileMode.Open));
-                Read(br);
-                br.Close();
+                Read(path);
             } catch(Exception e) {
                 Debug.LogError("异常发生在dds:"+path+"\n"+e);
             }
         }
 
-        private void Read(BinaryReader br) {
+        private void Read(string path) {
+            BinaryReader br = new BinaryReader(new FileStream(path,FileMode.Open));
             dwMagic=br.ReadUInt32();
             if(dwMagic!=0x20534444) throw new Exception("Invalid DDS header.");
             header=new DDS_HEADER(br);
@@ -58,49 +57,60 @@ namespace fs {
                     //DXT5
                     textureFormat=TextureFormat.DXT5;
                     break;
-                default: throw new Exception("Cannot load DDS due to an unsupported pixel format.");
+                default: {
+                    br.Close();
+                    throw new Exception("Cannot load DDS due to an unsupported pixel format.");
+                }
             }
 
             try {
-                byte[] dxtBytes = new byte[br.BaseStream.Length-br.BaseStream.Position];
-                int i = 0;
-                while(br.BaseStream.Position<br.BaseStream.Length) {
-                    dxtBytes[i]=br.ReadByte();
-                    i++;
-                }
-                    //Array.Reverse(dxtBytes);
-
-
+                int length = (int)(br.BaseStream.Length-br.BaseStream.Position);
+                byte[] dxtBytes = new byte[length];
+                dxtBytes = br.ReadBytes(length);
+                br.Close();
 
                 Texture2D texture2 = new Texture2D((int)header.dwWidth,(int)header.dwHeight,textureFormat,mipmaps);
                 texture2.LoadRawTextureData(dxtBytes);
                 texture2.Apply();
 
                 if(yMirror) {
-                    FlipTexture(texture2);
+                    texture = FlipTexture(texture2);
+                } else {
+                    texture=texture2;
                 }
+                
 
-
-                texture=texture2;
             } catch(Exception ex) {
+                br.Close();
                 throw new Exception("An error occured while loading DirectDraw Surface: " + ex.Message);
             }
         }
 
-        void FlipTexture(Texture2D textureOrigin) {
-            int width = textureOrigin.width;
-            int height = textureOrigin.height;
-            //Texture2D snap = new Texture2D(width,height);
+        void FlipTextureSelf(Texture2D textureOrigin) {
             Color[] pixels = textureOrigin.GetPixels();
             Color[] pixelsFlipped = new Color[pixels.Length];
 
-            for(int i = 0;i < height;i++) {
-                Array.Copy(pixels,i*width,pixelsFlipped,(height-i-1) * width,width);
+            for(int i = 0;i < header.dwHeight;i++) {
+                Array.Copy(pixels,i*header.dwWidth,pixelsFlipped,(header.dwHeight-i-1) * header.dwWidth,header.dwWidth);
             }
-
+            
 
             textureOrigin.SetPixels(pixelsFlipped);
             textureOrigin.Apply();
+        }
+
+        public static Texture2D FlipTexture(Texture2D textureOrigin) {
+            Color[] pixels = textureOrigin.GetPixels();
+            Color[] pixelsFlipped = new Color[pixels.Length];
+
+            for(int i = 0;i < textureOrigin.height;i++) {
+                Array.Copy(pixels,i*textureOrigin.width,pixelsFlipped,(textureOrigin.height-i-1) * textureOrigin.width,textureOrigin.width);
+            }
+            
+            Texture2D t = new Texture2D(textureOrigin.width,textureOrigin.height);
+            t.SetPixels(pixelsFlipped);
+            t.Apply();
+            return t;
         }
 
 
@@ -112,13 +122,13 @@ namespace fs {
             public uint dwPitchOrLinearSize;//The pitch or number of bytes per scan line in an uncompressed texture; the total number of bytes in the top level texture for a compressed texture.
             public uint dwDepth;  //Depth of a volume texture (in pixels), otherwise unused.
             public uint dwMipMapCount;//Number of mipmap levels, otherwise unused.
-            public uint[] dwReserved1;  //dwReserved1[11] Unused.
+            //public uint[] dwReserved1;  //dwReserved1[11] Unused.
             public DDS_PIXELFORMAT ddspf; //The pixel format
             public uint dwCaps; //Specifies the complexity of the surfaces stored.
             public uint dwCaps2;//Additional detail about the surfaces stored.
-            public uint dwCaps3;    //Unused.
-            public uint dwCaps4;    //Unused.
-            public uint dwReserved2;//Unused.
+            //public uint dwCaps3;    //Unused.
+            //public uint dwCaps4;    //Unused.
+            //public uint dwReserved2;//Unused.
 
             public DDS_HEADER(BinaryReader br) {
                 dwSize = br.ReadUInt32();
@@ -128,14 +138,16 @@ namespace fs {
                 dwPitchOrLinearSize = br.ReadUInt32();
                 dwDepth = br.ReadUInt32();
                 dwMipMapCount = br.ReadUInt32();
-                dwReserved1=new uint[11];
-                for(int i = 0;i<11;i++)  dwReserved1[i]=br.ReadUInt32();
+                br.BaseStream.Seek(44,SeekOrigin.Current);
+                //dwReserved1=new uint[11];
+                //for(int i = 0;i<11;i++)  dwReserved1[i]=br.ReadUInt32();
                 ddspf = new DDS_PIXELFORMAT(br);
                 dwCaps = br.ReadUInt32();
                 dwCaps2 = br.ReadUInt32();
-                dwCaps3 = br.ReadUInt32();
-                dwCaps4 = br.ReadUInt32();
-                dwReserved2 = br.ReadUInt32();
+                br.BaseStream.Seek(12,SeekOrigin.Current);
+                //dwCaps3 = br.ReadUInt32();
+                //dwCaps4 = br.ReadUInt32();
+                //dwReserved2 = br.ReadUInt32();
             }
         }
 

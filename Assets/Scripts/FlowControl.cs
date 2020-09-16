@@ -35,12 +35,14 @@ namespace ui {
 
             DirectoryInfo dir = new DirectoryInfo(G.BasePath+"/def/route");
             FileInfo[] files = dir.GetFiles();
+            //int i = 0;
             foreach(FileInfo file in files) {
                 if(!file.Extension.Equals(".sii",System.StringComparison.OrdinalIgnoreCase)) {
                     Debug.LogWarning("wrong file:"+file.FullName);
                     continue;
                 }
-
+                //if(i>10) break;
+                //i++;
                 string routePath = "/def/route/" + file.Name;
                 PreloadRoute(routePath);
             }

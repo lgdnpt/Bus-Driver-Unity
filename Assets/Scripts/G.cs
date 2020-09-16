@@ -29,6 +29,8 @@ class G:Singleton<G>{
     }
     private static string dataPath;
 
+    public static Dictionary<string,Texture> matCache;
+
     public ui.FlowControl flowControl;
 
 
