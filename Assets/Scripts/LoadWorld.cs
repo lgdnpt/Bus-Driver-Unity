@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class LoadWorld : MonoBehaviour {
     public Dropdown dropdown;
-    public PMGLoader pmgLoader;
+    //public PMGLoader pmgLoader;
     List<string> modelList = new List<string>();
     public GameObject[] model;
     public GameObject[] prefab;
@@ -46,7 +46,7 @@ public class LoadWorld : MonoBehaviour {
         lib.SetActive(false);
     }
     public void Load() {
-        pmgLoader.LoadPMG(modelList[dropdown.value]);
+        PMGLoader.LoadPMG(modelList[dropdown.value]);
     }
 
     void LoadModel() {
@@ -69,7 +69,7 @@ public class LoadWorld : MonoBehaviour {
 
             model[i]=new GameObject(temp.Substring(temp.LastIndexOf('/')+1).Replace(".pmd",""));
             model[i].transform.parent=lib.transform;
-            pmgLoader.LoadPMG(temp,model[i]);
+            PMGLoader.LoadPMG(temp,model[i]);
 
             modelList.Add(temp);
         }
@@ -91,7 +91,7 @@ public class LoadWorld : MonoBehaviour {
 
             prefab[i]=new GameObject(temp.Substring(temp.LastIndexOf('/')+1).Replace(".pmd",""));
             prefab[i].transform.parent=lib.transform;
-            pmgLoader.LoadPMG(temp,prefab[i]);
+            PMGLoader.LoadPMG(temp,prefab[i]);
         }
     }
 

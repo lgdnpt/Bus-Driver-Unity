@@ -20,7 +20,7 @@ class G:Singleton<G>{
     public static string DataPath {
         get {
             if(string.IsNullOrEmpty(dataPath)) {
-                return dataPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments) + "\\Bus Driver";
+                return dataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Bus Driver";
             } else {
                 return dataPath;
             }
@@ -28,9 +28,7 @@ class G:Singleton<G>{
         set => dataPath = DataPath;
     }
     private static string dataPath;
-
-    public static Dictionary<string,Texture> matCache;
-
+    
     public ui.FlowControl flowControl;
 
 

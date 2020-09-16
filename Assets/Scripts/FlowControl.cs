@@ -48,13 +48,14 @@ namespace ui {
             }
         }
 
+        public GameObject root;
         public void test2() {
             //Match matchImg = Regex.Match("<align hstyle=center vstyle=center><img src=/material/ui/white.mat color=FF000000 xscale=stretch yscale=stretch></align>",@"<img[^>]*?>");
             //Match matchSrc = Regex.Match(matchImg.ToString(),input.text);//"src=[^>]*\\s"
             //Match matchColor = Regex.Match(matchImg.ToString(),"color=[^>]*\\s");
             //print(matchSrc.ToString());
 
-
+            PMGLoader.LoadPMG("/model/misc/board/billboard01.pmd",root);
         }
 
         void LoadMissionSelection() {
@@ -197,10 +198,10 @@ namespace ui {
                 if(!File.Exists(G.BasePath + imageSrc)) {
                     throw new FileNotFoundException(imageSrc);
                 }
-                MatFile mat = new MatFile(imageSrc);
-                TobjFile tobj = new TobjFile(mat.texturePath[0]);
+                //MatFile mat = new MatFile(imageSrc);
+                //TobjFile tobj = new TobjFile(mat.texturePath[0]);
 
-                image.texture=tobj.texture;
+                image.texture=MatFile.GetTexture(imageSrc,false);
             }
             if(!string.IsNullOrEmpty(imageColor)) {
                 imageColor = imageColor.Substring(6,imageColor.Length-7);

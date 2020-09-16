@@ -4,18 +4,17 @@ using UnityEngine;
 using fs;
 
 public class PMGLoader : MonoBehaviour {
-    PmgFile pmg;
-    PmdFile pmd;
-    public void LoadPMG(string pmdPath) {
+    public static void LoadPMG(string pmdPath) {
         LoadPMG(pmdPath,new GameObject(pmdPath.Substring(pmdPath.LastIndexOf('/')+1).Replace(".pmd","")));
     }
-    public void LoadPMG(string pmdPath,GameObject root) {
+    public static void LoadPMG(string pmdPath,GameObject root) {
 
-        string pmgPath = pmdPath.Replace(".pmd",".pmg");
         print("读取模型pmd:"+pmdPath);
-        print("读取模型pmg:"+pmgPath);
-        pmg = new PmgFile(pmgPath);
-        pmd = new PmdFile(pmdPath);
+        //print("读取模型pmg:"+pmgPath);
+        /*pmg = new PmgFile(pmgPath);
+        pmd = new PmdFile(pmdPath);*/
+        PmdFile pmd = new PmdFile(pmdPath);
+        PmgFile pmg = pmd.pmgFile;
 
 
         //创建根物体
@@ -40,7 +39,7 @@ public class PMGLoader : MonoBehaviour {
                     Vector2[] uv = new Vector2[pmg.meshes[meshID].vertsCount];
                     for(int i = 0;i<vertices.Length;i++) {
                         vertices[i]=new Vector3(pmg.meshes[meshID].vertex[i].x,pmg.meshes[meshID].vertex[i].y,-pmg.meshes[meshID].vertex[i].z);
-                        uv[i] = new Vector2(pmg.meshes[meshID].uv[i].x,pmg.meshes[meshID].uv[i].y);
+                        uv[i] = new Vector2(pmg.meshes[meshID].uv[i].x,-pmg.meshes[meshID].uv[i].y);
                     }
 
 

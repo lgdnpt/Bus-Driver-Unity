@@ -26,7 +26,7 @@ namespace fs {
             DefReader reader;// = new DefReader(GlobalClass.GetBasePath() + path);
             //获得全部属性
             try {
-                reader = new DefReader(GlobalClass.GetBasePath() + path);
+                reader = new DefReader(G.BasePath + path);
             } catch(FileNotFoundException e) {
                 throw e;
             }
@@ -53,7 +53,7 @@ namespace fs {
                     reader.keys.TryGetValue("texture",out temp);
                     texturePath[0]=temp.Substring(1,temp.Length-2);
                     if(!texturePath[0].Contains("/")) {
-                        Debug.Log("修正相对路径");
+                        //Debug.Log("修正相对路径");
                         texturePath[0]=path.Substring(0,path.LastIndexOf('/')+1)+texturePath[0];
                     }
                 }
@@ -94,12 +94,17 @@ namespace fs {
             }
         }
 
-        public static Texture GetTexture(string matPath) {
-            try {
+        public static Texture GetTexture(string matPath,bool useCache=true) {
+            if(useCache) {
+                try {
+                    TobjFile tobj = Cache.LoadTobj(new MatFile(matPath).texturePath[0]);
+                    return tobj.texture;
+                } catch(FileNotFoundException e) {
+                    throw e;
+                }
+            } else {
                 TobjFile tobj = new TobjFile(new MatFile(matPath).texturePath[0]);
                 return tobj.texture;
-            } catch(FileNotFoundException e) {
-                throw e;
             }
         }
 

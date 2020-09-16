@@ -11,12 +11,12 @@ namespace fs {
         public uint dwMagic;
         public DDS_HEADER header;
 
-        public Texture Texture {get => texture; set => texture=Texture;}
-        private Texture texture;
+        public Texture Texture { get; private set; }
 
         public DDSFile(string path) {
+            ddsPath=path;
             try {
-                Read(path);
+                Read(G.BasePath + path);
             } catch(Exception e) {
                 Debug.LogError("异常发生在dds:"+path+"\n"+e);
             }
@@ -31,7 +31,9 @@ namespace fs {
 
             bool mipmaps = header.dwMipMapCount > 0;
 
-            bool yMirror = true;
+            
+            //bool yMirror = true;
+            bool compress = false;
 
             TextureFormat textureFormat;
             switch(header.ddspf.dwFourCC) {
@@ -52,10 +54,12 @@ namespace fs {
                 case 0x31545844:
                     //DXT1
                     textureFormat=TextureFormat.DXT1;
+                    compress=true;
                     break;
                 case 0x35545844:
                     //DXT5
                     textureFormat=TextureFormat.DXT5;
+                    compress=true;
                     break;
                 default: {
                     br.Close();
@@ -63,23 +67,24 @@ namespace fs {
                 }
             }
 
-            try {
-                int length = (int)(br.BaseStream.Length-br.BaseStream.Position);
-                byte[] dxtBytes = new byte[length];
-                dxtBytes = br.ReadBytes(length);
-                br.Close();
+            int length = (int)(br.BaseStream.Length-br.BaseStream.Position);
+            byte[] dxtBytes = br.ReadBytes(length);
+            br.Close();
 
+            try {
                 Texture2D texture2 = new Texture2D((int)header.dwWidth,(int)header.dwHeight,textureFormat,mipmaps);
                 texture2.LoadRawTextureData(dxtBytes);
                 texture2.Apply();
 
-                if(yMirror) {
-                    texture = FlipTexture(texture2);
-                } else {
-                    texture=texture2;
-                }
-                
 
+                texture2 = FlipTexture(texture2);
+                if(compress) texture2.Compress(true);
+                Texture = texture2;
+                /*if(yMirror) {
+                } else {
+                    Texture = texture2;
+                }*/
+                
             } catch(Exception ex) {
                 br.Close();
                 throw new Exception("An error occured while loading DirectDraw Surface: " + ex.Message);
@@ -149,161 +154,38 @@ namespace fs {
                 //dwCaps4 = br.ReadUInt32();
                 //dwReserved2 = br.ReadUInt32();
             }
-        }
 
-        public class DDS_PIXELFORMAT {
-            public uint dwSize;  //Structure size; set to 32 (bytes).
-            public uint dwFlags; //Values which indicate what type of data is in the surface.
-            public uint dwFourCC;//Four-character codes for specifying compressed or custom formats. Possible values include: DXT1, DXT2, DXT3, DXT4, or DXT5.
-            public uint dwRGBBitCount;//Number of bits in an RGB (possibly including alpha) format. Valid when dwFlags includes DDPF_RGB, DDPF_LUMINANCE, or DDPF_YUV.
-            public uint dwRBitMask;//Red (or lumiannce or Y) mask for reading color data. For instance, given the A8R8G8B8 format, the red mask would be 0x00ff0000.
-            public uint dwGBitMask;//Green (or U) mask for reading color data. For instance, given the A8R8G8B8 format, the green mask would be 0x0000ff00.
-            public uint dwBBitMask;//Blue (or V) mask for reading color data. For instance, given the A8R8G8B8 format, the blue mask would be 0x000000ff.
-            public uint dwABitMask;//Alpha mask for reading alpha data. dwFlags must include DDPF_ALPHAPIXELS or DDPF_ALPHA. For instance, given the A8R8G8B8 format, the alpha mask would be 0xff000000.
-            
-            /*dwFourCC
-            R8G8B8=0x0
-            DXT1=0x31545844
-            DXT2=0x32545844
-            DXT3=0x33545844
-            DXT4=0x34545844
-            DXT5=0x35545844
-            */
-            public DDS_PIXELFORMAT(BinaryReader br) {
-                dwSize = br.ReadUInt32();
-                dwFlags = br.ReadUInt32();
-                dwFourCC = br.ReadUInt32();
-                dwRGBBitCount = br.ReadUInt32();
-                dwRBitMask = br.ReadUInt32();
-                dwGBitMask = br.ReadUInt32();
-                dwBBitMask = br.ReadUInt32();
-                dwABitMask = br.ReadUInt32();
+            public class DDS_PIXELFORMAT {
+                public uint dwSize;  //Structure size; set to 32 (bytes).
+                public uint dwFlags; //Values which indicate what type of data is in the surface.
+                public uint dwFourCC;//Four-character codes for specifying compressed or custom formats. Possible values include: DXT1, DXT2, DXT3, DXT4, or DXT5.
+                public uint dwRGBBitCount;//Number of bits in an RGB (possibly including alpha) format. Valid when dwFlags includes DDPF_RGB, DDPF_LUMINANCE, or DDPF_YUV.
+                public uint dwRBitMask;//Red (or lumiannce or Y) mask for reading color data. For instance, given the A8R8G8B8 format, the red mask would be 0x00ff0000.
+                public uint dwGBitMask;//Green (or U) mask for reading color data. For instance, given the A8R8G8B8 format, the green mask would be 0x0000ff00.
+                public uint dwBBitMask;//Blue (or V) mask for reading color data. For instance, given the A8R8G8B8 format, the blue mask would be 0x000000ff.
+                public uint dwABitMask;//Alpha mask for reading alpha data. dwFlags must include DDPF_ALPHAPIXELS or DDPF_ALPHA. For instance, given the A8R8G8B8 format, the alpha mask would be 0xff000000.
+
+                /*dwFourCC
+                R8G8B8=0x0
+                DXT1=0x31545844
+                DXT2=0x32545844
+                DXT3=0x33545844
+                DXT4=0x34545844
+                DXT5=0x35545844
+                */
+                public DDS_PIXELFORMAT(BinaryReader br) {
+                    dwSize = br.ReadUInt32();
+                    dwFlags = br.ReadUInt32();
+                    dwFourCC = br.ReadUInt32();
+                    dwRGBBitCount = br.ReadUInt32();
+                    dwRBitMask = br.ReadUInt32();
+                    dwGBitMask = br.ReadUInt32();
+                    dwBBitMask = br.ReadUInt32();
+                    dwABitMask = br.ReadUInt32();
+                }
             }
         }
 
-        public enum DXGI_FORMAT {
-            DXGI_FORMAT_UNKNOWN,
-            DXGI_FORMAT_R32G32B32A32_TYPELESS,
-            DXGI_FORMAT_R32G32B32A32_FLOAT,
-            DXGI_FORMAT_R32G32B32A32_UINT,
-            DXGI_FORMAT_R32G32B32A32_SINT,
-            DXGI_FORMAT_R32G32B32_TYPELESS,
-            DXGI_FORMAT_R32G32B32_FLOAT,
-            DXGI_FORMAT_R32G32B32_UINT,
-            DXGI_FORMAT_R32G32B32_SINT,
-            DXGI_FORMAT_R16G16B16A16_TYPELESS,
-            DXGI_FORMAT_R16G16B16A16_FLOAT,
-            DXGI_FORMAT_R16G16B16A16_UNORM,
-            DXGI_FORMAT_R16G16B16A16_UINT,
-            DXGI_FORMAT_R16G16B16A16_SNORM,
-            DXGI_FORMAT_R16G16B16A16_SINT,
-            DXGI_FORMAT_R32G32_TYPELESS,
-            DXGI_FORMAT_R32G32_FLOAT,
-            DXGI_FORMAT_R32G32_UINT,
-            DXGI_FORMAT_R32G32_SINT,
-            DXGI_FORMAT_R32G8X24_TYPELESS,
-            DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
-            DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS,
-            DXGI_FORMAT_X32_TYPELESS_G8X24_UINT,
-            DXGI_FORMAT_R10G10B10A2_TYPELESS,
-            DXGI_FORMAT_R10G10B10A2_UNORM,
-            DXGI_FORMAT_R10G10B10A2_UINT,
-            DXGI_FORMAT_R11G11B10_FLOAT,
-            DXGI_FORMAT_R8G8B8A8_TYPELESS,
-            DXGI_FORMAT_R8G8B8A8_UNORM,
-            DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-            DXGI_FORMAT_R8G8B8A8_UINT,
-            DXGI_FORMAT_R8G8B8A8_SNORM,
-            DXGI_FORMAT_R8G8B8A8_SINT,
-            DXGI_FORMAT_R16G16_TYPELESS,
-            DXGI_FORMAT_R16G16_FLOAT,
-            DXGI_FORMAT_R16G16_UNORM,
-            DXGI_FORMAT_R16G16_UINT,
-            DXGI_FORMAT_R16G16_SNORM,
-            DXGI_FORMAT_R16G16_SINT,
-            DXGI_FORMAT_R32_TYPELESS,
-            DXGI_FORMAT_D32_FLOAT,
-            DXGI_FORMAT_R32_FLOAT,
-            DXGI_FORMAT_R32_UINT,
-            DXGI_FORMAT_R32_SINT,
-            DXGI_FORMAT_R24G8_TYPELESS,
-            DXGI_FORMAT_D24_UNORM_S8_UINT,
-            DXGI_FORMAT_R24_UNORM_X8_TYPELESS,
-            DXGI_FORMAT_X24_TYPELESS_G8_UINT,
-            DXGI_FORMAT_R8G8_TYPELESS,
-            DXGI_FORMAT_R8G8_UNORM,
-            DXGI_FORMAT_R8G8_UINT,
-            DXGI_FORMAT_R8G8_SNORM,
-            DXGI_FORMAT_R8G8_SINT,
-            DXGI_FORMAT_R16_TYPELESS,
-            DXGI_FORMAT_R16_FLOAT,
-            DXGI_FORMAT_D16_UNORM,
-            DXGI_FORMAT_R16_UNORM,
-            DXGI_FORMAT_R16_UINT,
-            DXGI_FORMAT_R16_SNORM,
-            DXGI_FORMAT_R16_SINT,
-            DXGI_FORMAT_R8_TYPELESS,
-            DXGI_FORMAT_R8_UNORM,
-            DXGI_FORMAT_R8_UINT,
-            DXGI_FORMAT_R8_SNORM,
-            DXGI_FORMAT_R8_SINT,
-            DXGI_FORMAT_A8_UNORM,
-            DXGI_FORMAT_R1_UNORM,
-            DXGI_FORMAT_R9G9B9E5_SHAREDEXP,
-            DXGI_FORMAT_R8G8_B8G8_UNORM,
-            DXGI_FORMAT_G8R8_G8B8_UNORM,
-            DXGI_FORMAT_BC1_TYPELESS,
-            DXGI_FORMAT_BC1_UNORM,
-            DXGI_FORMAT_BC1_UNORM_SRGB,
-            DXGI_FORMAT_BC2_TYPELESS,
-            DXGI_FORMAT_BC2_UNORM,
-            DXGI_FORMAT_BC2_UNORM_SRGB,
-            DXGI_FORMAT_BC3_TYPELESS,
-            DXGI_FORMAT_BC3_UNORM,
-            DXGI_FORMAT_BC3_UNORM_SRGB,
-            DXGI_FORMAT_BC4_TYPELESS,
-            DXGI_FORMAT_BC4_UNORM,
-            DXGI_FORMAT_BC4_SNORM,
-            DXGI_FORMAT_BC5_TYPELESS,
-            DXGI_FORMAT_BC5_UNORM,
-            DXGI_FORMAT_BC5_SNORM,
-            DXGI_FORMAT_B5G6R5_UNORM,
-            DXGI_FORMAT_B5G5R5A1_UNORM,
-            DXGI_FORMAT_B8G8R8A8_UNORM,
-            DXGI_FORMAT_B8G8R8X8_UNORM,
-            DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM,
-            DXGI_FORMAT_B8G8R8A8_TYPELESS,
-            DXGI_FORMAT_B8G8R8A8_UNORM_SRGB,
-            DXGI_FORMAT_B8G8R8X8_TYPELESS,
-            DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,
-            DXGI_FORMAT_BC6H_TYPELESS,
-            DXGI_FORMAT_BC6H_UF16,
-            DXGI_FORMAT_BC6H_SF16,
-            DXGI_FORMAT_BC7_TYPELESS,
-            DXGI_FORMAT_BC7_UNORM,
-            DXGI_FORMAT_BC7_UNORM_SRGB,
-            DXGI_FORMAT_AYUV,
-            DXGI_FORMAT_Y410,
-            DXGI_FORMAT_Y416,
-            DXGI_FORMAT_NV12,
-            DXGI_FORMAT_P010,
-            DXGI_FORMAT_P016,
-            DXGI_FORMAT_420_OPAQUE,
-            DXGI_FORMAT_YUY2,
-            DXGI_FORMAT_Y210,
-            DXGI_FORMAT_Y216,
-            DXGI_FORMAT_NV11,
-            DXGI_FORMAT_AI44,
-            DXGI_FORMAT_IA44,
-            DXGI_FORMAT_P8,
-            DXGI_FORMAT_A8P8,
-            DXGI_FORMAT_B4G4R4A4_UNORM,
-            DXGI_FORMAT_P208,
-            DXGI_FORMAT_V208,
-            DXGI_FORMAT_V408,
-            DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE,
-            DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE,
-            DXGI_FORMAT_FORCE_UINT
-        };
+        
     }
 }

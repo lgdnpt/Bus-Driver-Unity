@@ -38,8 +38,12 @@ namespace fs {
         public byte[] materialPaths;
         public string[] matPath;
 
+        public PmgFile pmgFile;
+
         public PmdFile(string path) {
             Read(new BinaryReader(new FileStream(GlobalClass.GetBasePath() + path,FileMode.Open)));
+            string pmgPath = path.Replace(".pmd",".pmg");
+            pmgFile = new PmgFile(pmgPath);
         }
 
         public void Read(BinaryReader br) {

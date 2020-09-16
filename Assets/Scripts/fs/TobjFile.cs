@@ -9,11 +9,11 @@ namespace fs {
         public string tobjPath;
         //header
         public uint commonHead; //1890650625
-        public uint unint0;
-        public uint unint1;
-        public uint unint2;
-        public uint unint3;
-        public ushort unshort0;
+        //public uint unint0;
+        //public uint unint1;
+        //public uint unint2;
+        //public uint unint3;
+        //public ushort unshort0;
         public byte bias;
         public byte unbyte0;
         public byte type;      // { map_1d = 1, map_2d = 2, map_3d = 3, map_cube = 5 }
@@ -26,10 +26,10 @@ namespace fs {
         public byte addrV; //   mirror = 4,  mirror_clamp = 5, mirror_clamp_to_edge = 6 }
         public byte addrW;
         public byte ui;
-        public byte unbyte3;
-        public byte unbyte4;
-        public byte unbyte5;
-        public byte unbyte6;
+        //public byte unbyte3;
+        //public byte unbyte4;
+        //public byte unbyte5;
+        //public byte unbyte6;
         public byte tsnormal;
         public byte unbyte7;
         //texture
@@ -40,22 +40,26 @@ namespace fs {
         public Texture texture;
 
         public static Dictionary<string,TobjFile> lib = new Dictionary<string,TobjFile>();
+
         public TobjFile(string path) {
             try {
                 BinaryReader br = new BinaryReader(new FileStream(G.BasePath + path,FileMode.Open));
                 Read(br);
                 br.Close();
-            }catch(Exception e) {
+            } catch(Exception e) {
                 Debug.LogError("异常发生在tobj:"+path+"\n"+e);
             }
         }
         private void Read(BinaryReader br) {
+
+
             commonHead=br.ReadUInt32();
-            unint0=br.ReadUInt32();
-            unint1=br.ReadUInt32();
-            unint2=br.ReadUInt32();
-            unint3=br.ReadUInt32();
-            unshort0=br.ReadUInt16();
+            br.BaseStream.Seek(18,SeekOrigin.Current);
+            //unint0=br.ReadUInt32();
+            //unint1=br.ReadUInt32();
+            //unint2=br.ReadUInt32();
+            //unint3=br.ReadUInt32();
+            //unshort0=br.ReadUInt16();
             bias=br.ReadByte();
             unbyte0=br.ReadByte();
             type=br.ReadByte();
@@ -68,10 +72,11 @@ namespace fs {
             addrV=br.ReadByte();
             addrW=br.ReadByte();
             ui=br.ReadByte();
-            unbyte3=br.ReadByte();
-            unbyte4=br.ReadByte();
-            unbyte5=br.ReadByte();
-            unbyte6=br.ReadByte();
+            br.BaseStream.Seek(4,SeekOrigin.Current);
+            //unbyte3=br.ReadByte();
+            //unbyte4=br.ReadByte();
+            //unbyte5=br.ReadByte();
+            //unbyte6=br.ReadByte();
             tsnormal=br.ReadByte();
             unbyte7=br.ReadByte();
 
@@ -79,9 +84,10 @@ namespace fs {
             unint4=br.ReadUInt32();
 
             byte[] pathb =new byte[length];
-            for(uint i = 0;i<length;i++) {
+            pathb = br.ReadBytes((int)length);
+/*            for(uint i = 0;i<length;i++) {
                 pathb[i]=br.ReadByte();
-            }
+            }*/
             path=Encoding.ASCII.GetString(pathb);
 
             texture=LoadTexture();
@@ -97,7 +103,7 @@ namespace fs {
                 path=path.Replace("\0","");
                 Debug.Log("读取纹理:"+path);
                 try {
-                    texture = (new DDSFile(G.BasePath+path)).Texture;//Dummiesman.DDSLoader.Load(GlobalClass.GetBasePath() + path);
+                    texture = (new DDSFile(path)).Texture;//Dummiesman.DDSLoader.Load(GlobalClass.GetBasePath() + path);
                     return texture;
                 } catch(Exception e) {
                     Debug.LogError("DDS("+path+")读取错误:\n"+e);
