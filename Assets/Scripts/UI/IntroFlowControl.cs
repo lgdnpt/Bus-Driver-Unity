@@ -15,6 +15,7 @@ namespace ui {
         }
 
         RawImage black;
+        public RawImage blackBg;
         public GameObject introGroup;
 
         Stack<GameObject> tempObjs = new Stack<GameObject>();
@@ -153,6 +154,7 @@ namespace ui {
             while(tempObjs.Count>0) {
                 Destroy(tempObjs.Pop());
             }
+            Destroy(blackBg);
             Hashtable args = new Hashtable {
                 {"color",Color.clear },
                 {"time",1.6167f },

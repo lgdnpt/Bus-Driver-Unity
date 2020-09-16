@@ -213,8 +213,8 @@ namespace ui {
 
         public void ApplyCoords(RectTransform tRT,SiiNunit.UI ui) {
             //上下镜像
-            tRT.rotation = Quaternion.AngleAxis(180,Vector3.right);
-            tRT.anchoredPosition=new Vector2(ui.coords_l*factor.x,/*Screen.height - */(ui.coords_b*factor.y)+(ui.coords_t-ui.coords_b)*factor.y);
+            //tRT.rotation = Quaternion.AngleAxis(180,Vector3.right);
+            tRT.anchoredPosition=new Vector2(ui.coords_l*factor.x,/*Screen.height - */(ui.coords_b*factor.y)/*+(ui.coords_t-ui.coords_b)*factor.y*/);
 
             tRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,(ui.coords_r-ui.coords_l)*factor.x);
             tRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,(ui.coords_t-ui.coords_b)*factor.y);
@@ -222,8 +222,8 @@ namespace ui {
 
         public void ApplyCoordsCenter(RectTransform tRT,SiiNunit.UI ui,int width,int height) {
             //上下镜像
-            tRT.rotation = Quaternion.AngleAxis(180,Vector3.right);
-            tRT.anchoredPosition=new Vector2((ui.coords_r+ui.coords_l - width)*factor.x/2f,(ui.coords_t+ui.coords_b-height)*factor.y/2 + height*factor.y);
+            //tRT.rotation = Quaternion.AngleAxis(180,Vector3.right);
+            tRT.anchoredPosition=new Vector2((ui.coords_r+ui.coords_l - width)*factor.x/2f,(ui.coords_t+ui.coords_b-height)*factor.y/2);
 
             tRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,width*factor.x);
             tRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,height*factor.y);
