@@ -31,6 +31,9 @@ namespace fs {
             if(header.dwSize!=0x7C) throw new Exception("Invalid DDS header. Structure length is incrrrect.");
 
             bool mipmaps = header.dwMipMapCount > 0;
+
+            bool yMirror = true;
+
             TextureFormat textureFormat;
             switch(header.ddspf.dwFourCC) {
                 case 0x0: {
@@ -65,20 +68,39 @@ namespace fs {
                     dxtBytes[i]=br.ReadByte();
                     i++;
                 }
-                //Array.Reverse(dxtBytes);
+                    //Array.Reverse(dxtBytes);
 
 
 
                 Texture2D texture2 = new Texture2D((int)header.dwWidth,(int)header.dwHeight,textureFormat,mipmaps);
                 texture2.LoadRawTextureData(dxtBytes);
                 texture2.Apply();
-                
+
+                if(yMirror) {
+                    FlipTexture(texture2);
+                }
 
 
                 texture=texture2;
             } catch(Exception ex) {
                 throw new Exception("An error occured while loading DirectDraw Surface: " + ex.Message);
             }
+        }
+
+        void FlipTexture(Texture2D textureOrigin) {
+            int width = textureOrigin.width;
+            int height = textureOrigin.height;
+            //Texture2D snap = new Texture2D(width,height);
+            Color[] pixels = textureOrigin.GetPixels();
+            Color[] pixelsFlipped = new Color[pixels.Length];
+
+            for(int i = 0;i < height;i++) {
+                Array.Copy(pixels,i*width,pixelsFlipped,(height-i-1) * width,width);
+            }
+
+
+            textureOrigin.SetPixels(pixelsFlipped);
+            textureOrigin.Apply();
         }
 
 

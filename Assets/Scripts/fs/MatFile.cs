@@ -94,6 +94,15 @@ namespace fs {
             }
         }
 
+        public static Texture GetTexture(string matPath) {
+            try {
+                TobjFile tobj = new TobjFile(new MatFile(matPath).texturePath[0]);
+                return tobj.texture;
+            } catch(FileNotFoundException e) {
+                throw e;
+            }
+        }
+
         float[] GetFloat(string str) {
             int startIndex = str.IndexOf('{');
             string[] temps=str.Substring(startIndex+1,str.IndexOf('}')-startIndex-1).Split(',');

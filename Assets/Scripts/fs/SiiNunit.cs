@@ -7,6 +7,7 @@ namespace fs {
     public class SiiNunit {
         public Dictionary<string,Unit> unit;
         public Dictionary<string,Unit> root;
+        public Unit baseUnit;
 
         public SiiNunit(string path) {
             unit=new Dictionary<string,Unit>();
@@ -81,11 +82,17 @@ namespace fs {
             }
 
             sr.Close();
-            LinkNodes();
+            try {
+                LinkNodes();
+            }catch(Exception e) { throw e; }
         }
         private void LinkNodes() {
             foreach(KeyValuePair<string,Unit> kvp in unit) {
-                kvp.Value.Init(unit);
+                try {
+                    kvp.Value.Init(unit);
+                } catch(Exception e) {
+                    throw e;
+                }
             }
 
             root=new Dictionary<string,Unit>();

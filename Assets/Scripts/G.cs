@@ -17,6 +17,18 @@ class G:Singleton<G>{
     }
     private static string basePath;
 
+    public static string DataPath {
+        get {
+            if(string.IsNullOrEmpty(dataPath)) {
+                return dataPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments) + "\\Bus Driver";
+            } else {
+                return dataPath;
+            }
+        }
+        set => dataPath = DataPath;
+    }
+    private static string dataPath;
+
     public ui.FlowControl flowControl;
 
 
