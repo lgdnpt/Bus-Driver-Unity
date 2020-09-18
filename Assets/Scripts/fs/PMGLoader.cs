@@ -4,9 +4,7 @@ using UnityEngine;
 using fs;
 
 public class PMGLoader : MonoBehaviour {
-    public static void LoadPMG(string pmdPath) {
-        LoadPMG(pmdPath,new GameObject(pmdPath.Substring(pmdPath.LastIndexOf('/')+1).Replace(".pmd","")));
-    }
+    public static void LoadPMG(string pmdPath) => LoadPMG(pmdPath,new GameObject(pmdPath.Substring(pmdPath.LastIndexOf('/')+1).Replace(".pmd","")));
     public static void LoadPMG(string pmdPath,GameObject root) {
 
         print("读取模型pmd:"+pmdPath);
