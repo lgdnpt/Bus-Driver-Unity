@@ -30,6 +30,24 @@ class G:Singleton<G>{
     private static string dataPath;
     
     public ui.FlowControl flowControl;
+    public LoadWorld loadWorld;
+
+    [Header("Materials")]
+    public Material dif;
+    public Material dif_spec;
+    public Material dif_spec_add_env;
+    public Material none_spec_add_env;
+    public Material dif_a_decal_over;
+
+    private void UnityShutup() {
+        dif=null;
+        dif_spec=null;
+        dif_spec_add_env=null;
+        none_spec_add_env=null;
+        dif_a_decal_over=null;
+        loadWorld=null;
+        flowControl=null;
+    }
 
 
     public static Color HexToABGR(string strHex) {

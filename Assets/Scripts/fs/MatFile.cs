@@ -8,8 +8,8 @@ namespace fs {
     class MatFile {
         public string matPath;
         public string shader;
-        public string[] texturePath;
-        public TobjFile[] tobj;
+        public string[] texturePaths;
+        public TobjFile[] tobjs;
         public float[] ambient;// = new float[3] { 1.0f,1.0f,1.0f };
         public float[] diffuse;// = new float[3] { 1.0f,1.0f,1.0f };
         public float[] specular;// = new float[3] { 1.0f,1.0f,1.0f };
@@ -17,6 +17,16 @@ namespace fs {
         public long shininess = 100;
         public float tint_opacity = 0.5f;
         public float[] tint;// = new float[3] { 1.0f,1.0f,1.0f };
+
+        public Material Material {
+            get {
+                if(material==null) {
+                    material = GetMaterial();
+                }
+                return material;
+            }
+        }
+        private Material material;
 
         //mat缓存库
         public static Dictionary<string,Material> lib=new Dictionary<string,Material>();
@@ -46,15 +56,15 @@ namespace fs {
                 tobjPath.Add(temp.Substring(1,temp.Length-2));
             }
 
-            texturePath=tobjPath.ToArray();
-            if(texturePath.Length<1) {
+            texturePaths=tobjPath.ToArray();
+            if(texturePaths.Length<1) {
                 if(reader.keys.ContainsKey("texture")) {
-                    texturePath=new string[1];
+                    texturePaths=new string[1];
                     reader.keys.TryGetValue("texture",out temp);
-                    texturePath[0]=temp.Substring(1,temp.Length-2);
-                    if(!texturePath[0].Contains("/")) {
+                    texturePaths[0]=temp.Substring(1,temp.Length-2);
+                    if(!texturePaths[0].Contains("/")) {
                         //Debug.Log("修正相对路径");
-                        texturePath[0]=path.Substring(0,path.LastIndexOf('/')+1)+texturePath[0];
+                        texturePaths[0]=path.Substring(0,path.LastIndexOf('/')+1)+texturePaths[0];
                     }
                 }
             }
@@ -97,13 +107,13 @@ namespace fs {
         public static Texture GetTexture(string matPath,bool useCache=true) {
             if(useCache) {
                 try {
-                    TobjFile tobj = Cache.LoadTobj(new MatFile(matPath).texturePath[0]);
+                    TobjFile tobj = Cache.LoadTobj(new MatFile(matPath).texturePaths[0]);
                     return tobj.texture;
                 } catch(FileNotFoundException e) {
                     throw e;
                 }
             } else {
-                TobjFile tobj = new TobjFile(new MatFile(matPath).texturePath[0]);
+                TobjFile tobj = new TobjFile(new MatFile(matPath).texturePaths[0]);
                 return tobj.texture;
             }
         }
@@ -116,52 +126,52 @@ namespace fs {
 
         
         public Material GetMaterial() {
-            Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            Debug.Log("  shader:"+shader);
-            //mat.SetFloat("_WorkflowMode",0.0f);
-
+            Material mat = null;// = new Material(Shader.Find("Universal Render Pipeline/Lit"));
 
             //反光,设源为alpha
             if(shader.Contains("dif_spec")) {
                 //启用albedo的alpha
-                mat=new Material(GlobalBusDriver.Instance.dif_spec_add_env);
+                mat=new Material(G.I.dif_spec_add_env);
                 mat.SetFloat("_Smoothness",1f);
             } else {
                 //mat.SetFloat("_Smoothness",0f);
             }
 
             if(shader.Contains(".a.")) {
-                mat=new Material(GlobalBusDriver.Instance.dif_a_decal_over);
+                mat=new Material(G.I.dif_a_decal_over);
             }
 
             if(shader.Contains("none_spec")) {
                 //玻璃
-                mat=new Material(GlobalBusDriver.Instance.none_spec_add_env);
+                mat=new Material(G.I.none_spec_add_env);
             }
 
-            /*if(mat == null)
-                mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));*/
+            if(mat == null) {
+                mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            }
+            
             mat.name=matPath;
 
             //读取tobj
-            if(texturePath.Length>0) {
-                tobj=new TobjFile[texturePath.Length];
-                for(int i = 0;i<texturePath.Length;i++) {
-                    if(texturePath[i].IndexOf('/')==-1) {
-                        texturePath[i] = matPath.Substring(0,matPath.LastIndexOf('/')+1)+texturePath[i];
+            if(texturePaths.Length>0) {
+                tobjs=new TobjFile[texturePaths.Length];
+                for(int i = 0;i<texturePaths.Length;i++) {
+                    if(texturePaths[i].IndexOf('/')==-1) {
+                        texturePaths[i] = matPath.Substring(0,matPath.LastIndexOf('/')+1)+texturePaths[i];
 
                     }
                     //读取缓存
-                    if(TobjFile.lib.ContainsKey(texturePath[i])) {
+                    tobjs[i] = Cache.LoadTobj(texturePaths[i]);
+                    /*if(TobjFile.lib.ContainsKey(texturePath[i])) {
                         TobjFile.lib.TryGetValue(texturePath[i],out tobj[i]);
                     } else {
                         tobj[i]=new TobjFile(texturePath[i]);
                         TobjFile.lib.Add(texturePath[i],tobj[i]);
-                    }
+                    }*/
                 }
                 //应用主纹理
-                if(tobj[0].texture!=null) {
-                    mat.SetTexture("_BaseMap",tobj[0].texture);
+                if(tobjs[0].texture!=null) {
+                    mat.SetTexture("_BaseMap",tobjs[0].texture);
                 }
             }
 

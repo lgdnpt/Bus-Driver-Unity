@@ -8,34 +8,39 @@ public class MBDLoader : MonoBehaviour {
 
     void Update() {
         if(Input.GetKeyDown(KeyCode.P)) {
-            string path = "/map/bus1.mbd";
-            mbd = new MbdFile(GlobalClass.GetBasePath() + path);
-            Debug.Log(mbd.originCount);
-            Debug.Log(mbd.nodeCount);
-            for(uint i = 0;i<mbd.originCount;i++) {//mbd.originCount
-                switch(mbd.origins[i].nodeType) {
-                    //case OriginType.Model: LoadModel((MbdFile.Model)mbd.origins[i]); break;
-                    //case OriginType.MissionModel: LoadMissionModel((MbdFile.MissionModel)mbd.origins[i]); break;
-                    case OriginType.Road: LoadRoad((MbdFile.Road)mbd.origins[i]); break;
-                    case OriginType.Prefab: LoadPrefab((MbdFile.Prefab)mbd.origins[i]); break;
-                }
+            StartCoroutine("LoadMBD");
+        }
+    }
+
+    IEnumerator LoadMBD() {
+        string path = "/map/bus1.mbd";
+        mbd = new MbdFile(G.BasePath + path);
+        Debug.Log(mbd.originCount);
+        Debug.Log(mbd.nodeCount);
+        for(uint i = 0;i<mbd.originCount;i++) {//mbd.originCount
+            switch(mbd.origins[i].nodeType) {
+                case OriginType.Model: LoadModel((MbdFile.Model)mbd.origins[i]); break;
+                //case OriginType.MissionModel: LoadMissionModel((MbdFile.MissionModel)mbd.origins[i]); break;
+                case OriginType.Road: LoadRoad((MbdFile.Road)mbd.origins[i]); break;
+                case OriginType.Prefab: LoadPrefab((MbdFile.Prefab)mbd.origins[i]); break;
             }
+            yield return null;
         }
     }
 
     void LoadModel(MbdFile.Model model) {
         Vector3 pos = mbd.nodes[model.nodeIndex].position.GetVector();
         Vector3 rot = model.rotation.GetVector();
-        GameObject a = Instantiate(GlobalBusDriver.Instance.loadWorld.model[model.modelNum],pos,Quaternion.Euler(rot));
+        GameObject a = Instantiate(G.I.loadWorld.model[model.modelNum],pos,Quaternion.Euler(rot));
         a.transform.localScale=model.scale.GetVector();
     }
     void LoadMissionModel(MbdFile.MissionModel misModel) {
         Vector3 pos = mbd.nodes[misModel.nodeIndex].position.GetVector();
         Vector3 rot = misModel.rotation.GetVector();
 
-        GameObject a = Instantiate(GlobalBusDriver.Instance.loadWorld.model[misModel.modelNum],pos,Quaternion.Euler(rot));
+        GameObject a = Instantiate(G.I.loadWorld.model[misModel.modelNum],pos,Quaternion.Euler(rot));
         a.transform.localScale=misModel.scale.GetVector();
-
+        Debug.Log("Mission model:");
     }
 
     void LoadRoad(MbdFile.Road road) {
@@ -73,7 +78,7 @@ public class MBDLoader : MonoBehaviour {
             Node temp;
             for(int j = 0;stack.Count>0;j++) {
                 temp = stack.Pop();
-                Debug.Log("出栈");
+                //Debug.Log("出栈");
 
                 Vector3 pos = temp.position.GetVector();
                 GameObject item = new GameObject("road_"+temp.thisOrigin);
@@ -89,8 +94,8 @@ public class MBDLoader : MonoBehaviour {
                 if(temp.thisOrigin!=0xFFFFFFFF && mbd.origins[temp.thisOrigin].nodeType==OriginType.Road) {
                     MbdFile.Road road1 = (MbdFile.Road)mbd.origins[temp.thisOrigin];
                     bz.nodes[j].length = road1.tangent/3;
-                    bz.nodes[j].width = (GlobalBusDriver.Instance.loadWorld.road[road1.roadNum].roadSize+
-                        GlobalBusDriver.Instance.loadWorld.road[road1.roadNum].roadOffset)*2;
+                    bz.nodes[j].width = (G.I.loadWorld.road[road1.roadNum].roadSize+
+                        G.I.loadWorld.road[road1.roadNum].roadOffset)*2;
                     bz.nodes[j].road = road1;
 
                     if((road1.flag & 0x01000000) == 0x01000000) {
@@ -140,7 +145,7 @@ public class MBDLoader : MonoBehaviour {
         GameObject prefabNode = new GameObject("prefab"+prefab.prefabNum);
         prefabNode.transform.position=pos;
         prefabNode.transform.rotation=Quaternion.Euler(rot);
-        GameObject n = Instantiate(GlobalBusDriver.Instance.loadWorld.prefab[prefab.prefabNum]);
+        GameObject n = Instantiate(G.I.loadWorld.prefab[prefab.prefabNum]);
         n.transform.parent=prefabNode.transform;
         n.transform.localRotation=new Quaternion();
         n.transform.localPosition=-pdd.node[nodeIndex].pos.GetVector();

@@ -196,7 +196,7 @@ public class Bezier : MonoBehaviour {
         renderBase=gameObject.AddComponent<MeshRenderer>();
 
         filterBase.mesh = meshBase;
-        renderBase.material = GlobalBusDriver.Instance.dif;
+        renderBase.material = G.I.dif;
         gameObject.AddComponent<MeshCollider>();
     }
     
@@ -216,7 +216,7 @@ public class Bezier : MonoBehaviour {
 
         Vector3 pos;
         Vector3 c1, c2, fwd, right;
-        LoadWorld.TerrainProfile profile = GlobalBusDriver.Instance.loadWorld.terProfile[nodes[0].road.dataRight.terrType];
+        LoadWorld.TerrainProfile profile = G.I.loadWorld.terProfile[nodes[0].road.dataRight.terrType];
 
         //添加第一条边
         start = nodes[0].position-terrain.transform.position;
@@ -238,7 +238,7 @@ public class Bezier : MonoBehaviour {
 
             //关键段从头到尾
             quad = nodes[nodeIndex].road.dataRight.terrQuad;
-            profile = GlobalBusDriver.Instance.loadWorld.terProfile[nodes[nodeIndex].road.dataRight.terrType];
+            profile = G.I.loadWorld.terProfile[nodes[nodeIndex].road.dataRight.terrType];
 
             c1 = nodes[nodeIndex].position+ nodes[nodeIndex].tangent *nodes[nodeIndex].length;
             c2 = nodes[nodeIndex+1].position- nodes[nodeIndex+1].tangent *nodes[nodeIndex].length;
@@ -253,7 +253,7 @@ public class Bezier : MonoBehaviour {
                 vertices.Add(pos);
 
                 step = 0; height = 0;
-                Debug.Log(nodes[nodeIndex].road.dataRight.terrCoef);
+                //Debug.Log(nodes[nodeIndex].road.dataRight.terrCoef);
                 for(int j = 1; j<=quad; j++) {
                     //地形网格从内到外
                     step+=profile.step[Mathf.Min(j-1,profile.step.Length-1)];
@@ -285,7 +285,7 @@ public class Bezier : MonoBehaviour {
         mesh.RecalculateNormals();
         
         terrain.AddComponent<MeshFilter>().mesh = mesh;
-        terrain.AddComponent<MeshRenderer>().material = GlobalBusDriver.Instance.dif;
+        terrain.AddComponent<MeshRenderer>().material = G.I.dif;
         terrain.AddComponent<MeshCollider>();
     }
 

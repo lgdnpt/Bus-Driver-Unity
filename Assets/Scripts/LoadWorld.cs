@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class LoadWorld : MonoBehaviour {
+
     public Dropdown dropdown;
     //public PMGLoader pmgLoader;
     List<string> modelList = new List<string>();
@@ -16,47 +17,32 @@ public class LoadWorld : MonoBehaviour {
     private string temp;
     GameObject lib;
     void Start() {
-        //def = new BusDriverFile.DefReader(GlobalClass.GetBasePath() + "/def/world/model.def");
-        
-        //def.keys.TryGetValue("model_count",out temp);
-        //int modelCount = int.Parse(temp);
 
-        //model=new GameObject[modelCount];
-        //for(int i = 0;i<modelCount;i++) {
-        //    def.keys.TryGetValue("model"+i,out temp);
-        //    if(temp.Equals("\"\"")) {
-        //        continue;
-        //    }
-        //    temp=temp.Substring(temp.IndexOf('|')+1,temp.Length-temp.IndexOf('|')-2).Trim();
-        //    if(temp.Contains("|")) {
-        //        temp=temp.Substring(0,temp.IndexOf('|')).Trim();
-        //    }
-        //    modelList.Add(temp);
-        //}
-        //dropdown.AddOptions(modelList);
     }
 
     public void LoadAll() {
         lib = new GameObject("lib");
         
         //LoadModel();
-        LoadPrefab();
-        LoadRoadLook();
-        LoadTerrain();
+        StartCoroutine("LoadModelCoroutine");
+        //LoadPrefab();
+        //LoadRoadLook();
+        //LoadTerrain();
         lib.SetActive(false);
     }
     public void Load() {
         PMGLoader.LoadPMG(modelList[dropdown.value]);
     }
 
-    void LoadModel() {
+
+    IEnumerator LoadModelCoroutine() {
         def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/model.def");
 
         def.keys.TryGetValue("model_count",out temp);
         int modelCount = int.Parse(temp);
 
         model=new GameObject[modelCount];
-        
+
         for(int i = 0;i<modelCount;i++) {
             def.keys.TryGetValue("model"+i,out temp);
             if(temp.Equals("\"\"")) {
@@ -72,11 +58,15 @@ public class LoadWorld : MonoBehaviour {
             PMGLoader.LoadPMG(temp,model[i]);
 
             modelList.Add(temp);
+            yield return 0;
         }
+        Debug.Log("读取模型结束");
+        StartCoroutine("LoadPrefabCoroutine");
     }
 
-    void LoadPrefab() {
-        def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/prefab.def");
+
+    IEnumerator LoadPrefabCoroutine() {
+        def = new fs.DefReader(G.BasePath + "/def/world/prefab.def");
         def.keys.TryGetValue("prefab_count",out temp);
         int prefabCount = int.Parse(temp);
         prefab=new GameObject[prefabCount];
@@ -92,10 +82,13 @@ public class LoadWorld : MonoBehaviour {
             prefab[i]=new GameObject(temp.Substring(temp.LastIndexOf('/')+1).Replace(".pmd",""));
             prefab[i].transform.parent=lib.transform;
             PMGLoader.LoadPMG(temp,prefab[i]);
+            yield return 0;
         }
+        Debug.Log("读取路口结束");
+        StartCoroutine("LoadRoadLook");
     }
 
-    void LoadRoadLook() {
+    IEnumerator LoadRoadLook() {
         def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/road.def");
         def.keys.TryGetValue("road_look_count",out temp);
         int roadLookCount = int.Parse(temp);
@@ -110,7 +103,10 @@ public class LoadWorld : MonoBehaviour {
             string[] temps = temp.Split(';');
             if(temps.Length!=12) Debug.LogError("道路"+i+"数据错误");
             road[i]=new RoadLook(temps);
+            yield return null;
         }
+        Debug.Log("读取道路样式结束");
+        StartCoroutine("LoadTerrain");
     }
 
     public class RoadLook {
@@ -142,7 +138,7 @@ public class LoadWorld : MonoBehaviour {
         }
     }
 
-    void LoadTerrain() {
+    IEnumerator LoadTerrain() {
         def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/terrain.def");
         def.keys.TryGetValue("profile_count",out temp);
         int count = int.Parse(temp);
@@ -164,8 +160,10 @@ public class LoadWorld : MonoBehaviour {
                 terProfile[i].height[j]=float.Parse(temps[j]);
                 terProfile[i].step[j]=float.Parse(temps2[j]);
             }
+            yield return null;
         }
         //Debug.LogWarning(terProfile.Length);
+        Debug.Log("读取地形结束");
     }
     public struct TerrainProfile {
         public string name;

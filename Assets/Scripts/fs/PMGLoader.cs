@@ -23,7 +23,7 @@ public class PMGLoader : MonoBehaviour {
             if(pmg.groups[groupi].meshCount>0) {
                 //读取mesh
                 for(int meshi=0;meshi<pmg.groups[groupi].meshCount;meshi++) {
-                    print("读取组:"+pmg.groups[groupi].name.Text);
+                    //print("读取组:"+pmg.groups[groupi].name.Text);
                     string meshName = pmg.groups[groupi].name.Text+" "+meshi;
                     GameObject meshObj = new GameObject(meshName);
                     meshObj.transform.parent=group.transform;
@@ -75,10 +75,11 @@ public class PMGLoader : MonoBehaviour {
                         if(matPath.IndexOf('/')<0) {
                             matPath = pmdPath.Substring(0,pmdPath.LastIndexOf('/')+1) + matPath;
                         }
-                        Debug.Log("读取材质:"+matPath);
+                        //Debug.Log("读取材质:"+matPath);
 
                         //读取材质
-                        if(MatFile.lib.ContainsKey(matPath)) {
+                        mat = fs.Cache.LoadMat(matPath).Material;
+                        /*if(MatFile.lib.ContainsKey(matPath)) {
                             //从库中取出
                             MatFile.lib.TryGetValue(matPath,out mat);
                         } else {
@@ -87,12 +88,11 @@ public class PMGLoader : MonoBehaviour {
                             mat=matFile.GetMaterial();
                             //添加到材质库
                             MatFile.lib.Add(matPath,mat);
-                        }
+                        }*/
 
                         //应用材质
                         MeshRenderer renderer = meshObj.AddComponent<MeshRenderer>();
                         renderer.material = mat;
-
                     }
                 }
             }

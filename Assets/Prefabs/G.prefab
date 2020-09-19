@@ -44,3 +44,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   flowControl: {fileID: 0}
+  loadWorld: {fileID: 0}

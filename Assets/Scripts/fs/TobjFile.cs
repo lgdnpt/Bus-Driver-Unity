@@ -39,7 +39,7 @@ namespace fs {
 
         public Texture texture;
 
-        public static Dictionary<string,TobjFile> lib = new Dictionary<string,TobjFile>();
+        //public static Dictionary<string,TobjFile> lib = new Dictionary<string,TobjFile>();
 
         public TobjFile(string path) {
             try {
@@ -51,8 +51,6 @@ namespace fs {
             }
         }
         private void Read(BinaryReader br) {
-
-
             commonHead=br.ReadUInt32();
             br.BaseStream.Seek(18,SeekOrigin.Current);
             //unint0=br.ReadUInt32();
@@ -83,8 +81,8 @@ namespace fs {
             length=br.ReadUInt32();
             unint4=br.ReadUInt32();
 
-            byte[] pathb =new byte[length];
-            pathb = br.ReadBytes((int)length);
+            //byte[] pathb =new byte[length];
+            byte[] pathb = br.ReadBytes((int)length);
 /*            for(uint i = 0;i<length;i++) {
                 pathb[i]=br.ReadByte();
             }*/
@@ -103,7 +101,11 @@ namespace fs {
                 path=path.Replace("\0","");
                 Debug.Log("读取纹理:"+path);
                 try {
-                    texture = (new DDSFile(path)).Texture;//Dummiesman.DDSLoader.Load(GlobalClass.GetBasePath() + path);
+                    texture = (new DDSFile(path)).Texture; //Dummiesman.DDSLoader.Load(GlobalClass.GetBasePath() + path);
+                    texture.wrapModeU = GetWrapMode(addrU);
+                    texture.wrapModeV = GetWrapMode(addrV);
+                    texture.wrapModeW = GetWrapMode(addrW);
+                    //texture.filterMode = FilterMode.
                     return texture;
                 } catch(Exception e) {
                     Debug.LogError("DDS("+path+")读取错误:\n"+e);
@@ -112,6 +114,28 @@ namespace fs {
                 Debug.LogWarning("空纹理路径:tobj("+tobjPath+")");
             }
             return null;
+        }
+
+        private TextureWrapMode GetWrapMode(byte b) {
+            switch(b) {
+                case 0: return TextureWrapMode.Repeat;
+                case 1: return TextureWrapMode.Clamp;
+                case 2: return TextureWrapMode.Clamp;
+                case 3: return TextureWrapMode.Clamp;
+                case 4: return TextureWrapMode.Mirror;
+                case 5: return TextureWrapMode.MirrorOnce;
+                case 6: return TextureWrapMode.MirrorOnce;
+                default: return TextureWrapMode.Repeat;
+            }
+        }
+        private FilterMode GetFilterMode(byte b) {
+            switch(b) {
+                case 0: return FilterMode.Point;
+                case 1: return FilterMode.Bilinear;
+                case 2: return FilterMode.Bilinear;
+                case 3: return FilterMode.Trilinear;
+                default: return FilterMode.Bilinear;
+            }
         }
     }
 }
