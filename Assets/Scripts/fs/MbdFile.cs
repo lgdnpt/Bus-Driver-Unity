@@ -48,6 +48,11 @@ namespace fs {
         public Origin[] origins;
         public Node[] nodes;
 
+        public Node GetNode(uint i) => nodes[i];
+        public Origin GetOrigin(uint i) => origins[i];
+        public Origin GetThisOrigin(Node node) => origins[node.thisOrigin];
+        public Origin GetBackOrigin(Node node) => origins[node.backOrigin];
+
         public MbdFile(string mapPath) {
             BinaryReader br = new BinaryReader(new FileStream(mapPath,FileMode.Open));
             if(br.ReadUInt32()!=fileHead) UnityEngine.Debug.LogError("MBD文件格式错误");

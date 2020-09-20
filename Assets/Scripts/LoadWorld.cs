@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class LoadWorld : MonoBehaviour {
-
     public Dropdown dropdown;
     //public PMGLoader pmgLoader;
     List<string> modelList = new List<string>();
@@ -12,6 +11,7 @@ public class LoadWorld : MonoBehaviour {
     public GameObject[] prefab;
     public RoadLook[] road;
     public TerrainProfile[] terProfile;
+    public Material[] terMats;
 
     private fs.DefReader def;
     private string temp;
@@ -23,8 +23,8 @@ public class LoadWorld : MonoBehaviour {
     public void LoadAll() {
         lib = new GameObject("lib");
         
-        //LoadModel();
         StartCoroutine("LoadModelCoroutine");
+        //LoadModel();
         //LoadPrefab();
         //LoadRoadLook();
         //LoadTerrain();
@@ -36,7 +36,7 @@ public class LoadWorld : MonoBehaviour {
 
 
     IEnumerator LoadModelCoroutine() {
-        def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/model.def");
+        def = new fs.DefReader(G.BasePath + "/def/world/model.def");
 
         def.keys.TryGetValue("model_count",out temp);
         int modelCount = int.Parse(temp);
@@ -89,7 +89,7 @@ public class LoadWorld : MonoBehaviour {
     }
 
     IEnumerator LoadRoadLook() {
-        def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/road.def");
+        def = new fs.DefReader(G.BasePath + "/def/world/road.def");
         def.keys.TryGetValue("road_look_count",out temp);
         int roadLookCount = int.Parse(temp);
         road=new RoadLook[roadLookCount];
@@ -139,7 +139,22 @@ public class LoadWorld : MonoBehaviour {
     }
 
     IEnumerator LoadTerrain() {
-        def = new fs.DefReader(GlobalClass.GetBasePath() + "/def/world/terrain.def");
+        def = new fs.DefReader(G.BasePath + "/def/world/terrain.def");
+
+        //读取地形材质
+        def.keys.TryGetValue("material_count",out temp);
+        int matcount = int.Parse(temp);
+        terMats = new Material[matcount];
+        for(int i = 0;i<matcount;i++) {
+            def.keys.TryGetValue("material"+i,out temp);
+            temp = temp.Substring(1,temp.Length-2).Trim();
+
+            terMats[i] = fs.Cache.LoadMat(temp).Material;
+            yield return null;
+        }
+
+
+        //读取地形配置
         def.keys.TryGetValue("profile_count",out temp);
         int count = int.Parse(temp);
         terProfile=new TerrainProfile[count];

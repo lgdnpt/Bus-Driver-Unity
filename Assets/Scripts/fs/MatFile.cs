@@ -132,7 +132,7 @@ namespace fs {
             if(shader.Contains("dif_spec")) {
                 //启用albedo的alpha
                 mat=new Material(G.I.dif_spec_add_env);
-                mat.SetFloat("_Smoothness",1f);
+                mat.SetFloat("_Smoothness",0.5f);
             } else {
                 //mat.SetFloat("_Smoothness",0f);
             }
@@ -158,16 +158,9 @@ namespace fs {
                 for(int i = 0;i<texturePaths.Length;i++) {
                     if(texturePaths[i].IndexOf('/')==-1) {
                         texturePaths[i] = matPath.Substring(0,matPath.LastIndexOf('/')+1)+texturePaths[i];
-
                     }
                     //读取缓存
                     tobjs[i] = Cache.LoadTobj(texturePaths[i]);
-                    /*if(TobjFile.lib.ContainsKey(texturePath[i])) {
-                        TobjFile.lib.TryGetValue(texturePath[i],out tobj[i]);
-                    } else {
-                        tobj[i]=new TobjFile(texturePath[i]);
-                        TobjFile.lib.Add(texturePath[i],tobj[i]);
-                    }*/
                 }
                 //应用主纹理
                 if(tobjs[0].texture!=null) {
@@ -176,14 +169,20 @@ namespace fs {
             }
 
             //应用颜色
+/*            if(ambient!=null) {
+                //mat.SetColor("_BaseColor",new Color(diffuse[0],diffuse[1],diffuse[2]));
+                
+            }*/
+            mat.SetColor("_BaseColor",Color.white);
             if(diffuse!=null) {
-                mat.SetColor("_BaseColor",new Color(diffuse[0],diffuse[1],diffuse[2]));
+                //mat.SetColor("_BaseColor",new Color(diffuse[0],diffuse[1],diffuse[2]));
+                mat.SetColor("_BaseColor",Color.white);
             }
-            if(specular!=null) {
+/*            if(specular!=null) {
                 mat.SetColor("_SpecColor",new Color(specular[0],specular[1],specular[2]));
             } else {
                 mat.SetColor("_SpecColor",Color.black);
-            }
+            }*/
             return mat;
         }
     }

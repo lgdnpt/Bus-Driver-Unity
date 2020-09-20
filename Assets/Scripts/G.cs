@@ -38,6 +38,7 @@ class G:Singleton<G>{
     public Material dif_spec_add_env;
     public Material none_spec_add_env;
     public Material dif_a_decal_over;
+    public Material not_found;
 
     private void UnityShutup() {
         dif=null;

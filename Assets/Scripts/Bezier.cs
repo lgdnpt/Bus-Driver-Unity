@@ -201,7 +201,7 @@ public class Bezier : MonoBehaviour {
     }
     
 
-    public void UpadteTerrain() {
+    public void UpadteTerrain(Material mat) {
         //for(int i = 0;i<nodes.Length-1;i++) {
         //    nodes[i].segmentNum=(uint)(nodes[i].length*optimize);
         //}
@@ -223,6 +223,7 @@ public class Bezier : MonoBehaviour {
         fwd= nodes[0].tangent;
         right=Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up)*fwd,Vector3.up).normalized;
         vertices.Add(start);
+        uvs.Add(new Vector2(start.x,start.z));
 
         float step = 0, height = 0;
         for(int j = 1;j<=nodes[0].road.dataRight.terrQuad;j++) {
@@ -231,6 +232,7 @@ public class Bezier : MonoBehaviour {
             height+=profile.height[Mathf.Min(j,profile.height.Length-1)];
             pos=start+ step*right + nodes[0].road.dataRight.terrCoef*height*Vector3.up;
             vertices.Add(pos);
+            uvs.Add(new Vector2(pos.x,pos.z));
         }
 
         ushort quad;
@@ -251,6 +253,7 @@ public class Bezier : MonoBehaviour {
 
                 pos=end;
                 vertices.Add(pos);
+                uvs.Add(new Vector2(pos.x,pos.z));
 
                 step = 0; height = 0;
                 //Debug.Log(nodes[nodeIndex].road.dataRight.terrCoef);
@@ -262,6 +265,7 @@ public class Bezier : MonoBehaviour {
                     pos=end+ step*right + nodes[nodeIndex].road.dataRight.terrCoef*height*Vector3.up;
                     int vIndex = vertices.Count;
                     vertices.Add(pos);
+                    uvs.Add(new Vector2(pos.x,pos.z));
                     triangles.Add(vIndex);
                     triangles.Add(vIndex-quad-2);
                     triangles.Add(vIndex-1);
@@ -273,19 +277,19 @@ public class Bezier : MonoBehaviour {
             }
         }
 
-
+        //nodes[nodeIndex].road.matNum
 
         Mesh mesh = new Mesh {
             name=terrain.name,
             vertices = vertices.ToArray(),
-            //uv = uvs.ToArray(),
+            uv = uvs.ToArray(),
             triangles = triangles.ToArray() //三角面
         };
         mesh.Optimize();
         mesh.RecalculateNormals();
         
         terrain.AddComponent<MeshFilter>().mesh = mesh;
-        terrain.AddComponent<MeshRenderer>().material = G.I.dif;
+        terrain.AddComponent<MeshRenderer>().material = mat;
         terrain.AddComponent<MeshCollider>();
     }
 

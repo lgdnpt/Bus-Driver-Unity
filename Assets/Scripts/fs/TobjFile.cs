@@ -99,12 +99,12 @@ namespace fs {
                     path=tobjPath.Substring(0,tobjPath.LastIndexOf('/')+1)+path;
                 }
                 path=path.Replace("\0","");
-                Debug.Log("读取纹理:"+path);
+                //Debug.Log("读取纹理:"+path);
                 try {
                     texture = (new DDSFile(path)).Texture; //Dummiesman.DDSLoader.Load(GlobalClass.GetBasePath() + path);
-                    texture.wrapModeU = GetWrapMode(addrU);
-                    texture.wrapModeV = GetWrapMode(addrV);
-                    texture.wrapModeW = GetWrapMode(addrW);
+                    //texture.wrapModeU = GetWrapMode(addrU);
+                    //texture.wrapModeV = GetWrapMode(addrV);
+                    //texture.wrapModeW = GetWrapMode(addrW);
                     //texture.filterMode = FilterMode.
                     return texture;
                 } catch(Exception e) {

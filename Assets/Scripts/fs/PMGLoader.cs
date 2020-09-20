@@ -7,8 +7,7 @@ public class PMGLoader : MonoBehaviour {
     public static void LoadPMG(string pmdPath) => LoadPMG(pmdPath,new GameObject(pmdPath.Substring(pmdPath.LastIndexOf('/')+1).Replace(".pmd","")));
     public static void LoadPMG(string pmdPath,GameObject root) {
 
-        print("读取模型pmd:"+pmdPath);
-        //print("读取模型pmg:"+pmgPath);
+        //print("读取模型pmd:"+pmdPath);
         /*pmg = new PmgFile(pmgPath);
         pmd = new PmdFile(pmdPath);*/
         PmdFile pmd = new PmdFile(pmdPath);
