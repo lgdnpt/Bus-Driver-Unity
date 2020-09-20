@@ -46,9 +46,12 @@ class G:Singleton<G>{
         dif_spec_add_env=null;
         none_spec_add_env=null;
         dif_a_decal_over=null;
+        not_found=null;
         loadWorld=null;
         flowControl=null;
     }
+
+    public static bool GetFlag(uint res,uint flag) => (res & flag) == flag;
 
 
     public static Color HexToABGR(string strHex) {

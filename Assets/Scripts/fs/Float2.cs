@@ -14,8 +14,6 @@
             x=br.ReadSingle();
             y=br.ReadSingle();
         }
-        public override string ToString() {
-            return string.Format("({0:g},{1:g})",x,y);
-        }
+        public override string ToString() => string.Format("({0:g},{1:g})",x,y);
     }
 }

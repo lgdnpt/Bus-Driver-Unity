@@ -18,11 +18,7 @@
             y=br.ReadSingle();
             z=br.ReadSingle();
         }
-        public override string ToString() {
-            return string.Format("({0:g},{1:g},{2:g})",x,y,z);
-        }
-        public UnityEngine.Vector3 GetVector() {
-            return new UnityEngine.Vector3(x,y,z);
-        }
+        public override string ToString() => string.Format("({0:g},{1:g},{2:g})",x,y,z);
+        public UnityEngine.Vector3 GetVector() => new UnityEngine.Vector3(x,y,z);
     }
 }

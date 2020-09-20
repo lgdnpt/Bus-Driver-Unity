@@ -22,8 +22,6 @@
             y=br.ReadSingle();
             z=br.ReadSingle();
         }
-        public override string ToString() {
-            return string.Format("({0:g},{1:g},{2:g},{3:g})",w,x,y,z);
-        }
+        public override string ToString() => string.Format("({0:g},{1:g},{2:g},{3:g})",w,x,y,z);
     }
 }

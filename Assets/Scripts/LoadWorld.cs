@@ -23,7 +23,8 @@ public class LoadWorld : MonoBehaviour {
     public void LoadAll() {
         lib = new GameObject("lib");
         
-        StartCoroutine("LoadModelCoroutine");
+        //StartCoroutine("LoadModelCoroutine");
+        StartCoroutine("LoadRoadLook");
         //LoadModel();
         //LoadPrefab();
         //LoadRoadLook();
