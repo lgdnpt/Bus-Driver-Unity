@@ -17,8 +17,10 @@ namespace fs {
             ddsPath=path;
             try {
                 Read(G.BasePath + path);
+            } catch(FileNotFoundException e) {
+                Debug.LogError("[fs] Unable to open file for reading. ("+path+") |"+e);
             } catch(Exception e) {
-                Debug.LogError("异常发生在dds:"+path+"\n"+e);
+                Debug.LogError("[dds] Can not load '"+path+"' |"+e);
             }
         }
 

@@ -37,6 +37,7 @@ public class LoadWorld : MonoBehaviour {
 
 
     IEnumerator LoadModelCoroutine() {
+        Debug.Log("Loading model data ....");
         def = new fs.DefReader(G.BasePath + "/def/world/model.def");
 
         def.keys.TryGetValue("model_count",out temp);
@@ -61,12 +62,12 @@ public class LoadWorld : MonoBehaviour {
             modelList.Add(temp);
             yield return 0;
         }
-        Debug.Log("读取模型结束");
         StartCoroutine("LoadPrefabCoroutine");
     }
 
 
     IEnumerator LoadPrefabCoroutine() {
+        Debug.Log("Loading prefab data ....");
         def = new fs.DefReader(G.BasePath + "/def/world/prefab.def");
         def.keys.TryGetValue("prefab_count",out temp);
         int prefabCount = int.Parse(temp);
@@ -85,11 +86,11 @@ public class LoadWorld : MonoBehaviour {
             PMGLoader.LoadPMG(temp,prefab[i]);
             yield return 0;
         }
-        Debug.Log("读取路口结束");
         StartCoroutine("LoadRoadLook");
     }
 
     IEnumerator LoadRoadLook() {
+        Debug.Log("Loading road data ....");
         def = new fs.DefReader(G.BasePath + "/def/world/road.def");
         def.keys.TryGetValue("road_look_count",out temp);
         int roadLookCount = int.Parse(temp);
@@ -106,7 +107,6 @@ public class LoadWorld : MonoBehaviour {
             road[i]=new RoadLook(temps);
             yield return null;
         }
-        Debug.Log("读取道路样式结束");
         StartCoroutine("LoadTerrain");
     }
 
@@ -140,6 +140,7 @@ public class LoadWorld : MonoBehaviour {
     }
 
     IEnumerator LoadTerrain() {
+        Debug.Log("Loading terrain data ....");
         def = new fs.DefReader(G.BasePath + "/def/world/terrain.def");
 
         //读取地形材质
@@ -179,7 +180,6 @@ public class LoadWorld : MonoBehaviour {
             yield return null;
         }
         //Debug.LogWarning(terProfile.Length);
-        Debug.Log("读取地形结束");
     }
     public struct TerrainProfile {
         public string name;

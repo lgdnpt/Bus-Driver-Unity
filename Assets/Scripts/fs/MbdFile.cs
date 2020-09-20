@@ -37,6 +37,9 @@ namespace fs {
             flag=br.ReadUInt32();
             divF=br.ReadByte();
         }
+
+        public UnityEngine.Vector3 Position => position.GetVector();
+        public UnityEngine.Vector3 Direction => direction.GetVector();
     }
     public enum OriginType:uint {Road=0x02,Prefab=0x03,Building=0x01, Model=0x04, CutPlane=0x07,
         Mover=0x08, City=0x0B, QuestPoint=0x0D, NoWeather=0x0A, BusStop=0x0E, MissionModel=0x10

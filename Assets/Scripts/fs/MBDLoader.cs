@@ -10,6 +10,10 @@ public class MBDLoader : MonoBehaviour {
         if(Input.GetKeyDown(KeyCode.P)) {
             StartCoroutine("LoadMBD");
         }
+        if(Input.GetKeyDown(KeyCode.Q)) {
+            Debug.Log(Quaternion.FromToRotation(new Vector3(1,0,0),new Vector3(0,1,0)).eulerAngles);
+            Debug.Log(Quaternion.FromToRotation(new Vector3(1,0,0),new Vector3(0.60106f,-0.05511f,0.79730f)).eulerAngles);
+        }
     }
 
     IEnumerator LoadMBD() {
@@ -21,7 +25,7 @@ public class MBDLoader : MonoBehaviour {
             switch(mbd.origins[i].nodeType) {
                 //case OriginType.Model: LoadModel((MbdFile.Model)mbd.origins[i]); break;
                 //case OriginType.MissionModel: LoadMissionModel((MbdFile.MissionModel)mbd.origins[i]); break;
-                case OriginType.Road: LoadRoad2((MbdFile.Road)mbd.origins[i]); break;
+                case OriginType.Road: LoadRoad((MbdFile.Road)mbd.origins[i]); break;
                 //case OriginType.Prefab: LoadPrefab((MbdFile.Prefab)mbd.origins[i]); break;
             }
             yield return null;
@@ -44,149 +48,63 @@ public class MBDLoader : MonoBehaviour {
         Debug.Log("Mission model:");
     }
 
+
     void LoadRoad(MbdFile.Road road) {
         uint i = mbd.nodes[road.startIndex].thisOrigin;
-        //Debug.Log(i+"是Road");
-        if(mbd.nodes[road.endIndex].thisOrigin==0xFFFFFFFF
-            //|| mbd.origins[mbd.nodes[road.endIndex].thisOrigin].nodeType!=OriginType.Road) {
-            || mbd.GetThisOrigin(mbd.nodes[road.endIndex]).nodeType!=OriginType.Road) {
-            //一段路结束
 
-            //if((road.flag & 0x00010000)!=0x00010000) return;
-            //Debug.Log(i+"是Road结束");
-            GameObject root = new GameObject("root_"+i);
-            Bezier bz = root.AddComponent<Bezier>();
-
-            Stack<Node> stack = new Stack<Node>();
-
-            stack.Push(mbd.nodes[road.endIndex]);
-            Node pr = mbd.nodes[road.startIndex];
-            stack.Push(pr);
-
-            //回溯到road起点
-            while(pr.backOrigin!=0xFFFFFFFF) {
-                /*if(mbd.origins[pr.backOrigin].nodeType==OriginType.Road) {
-                    pr = mbd.nodes[((MbdFile.Road)mbd.origins[pr.backOrigin]).startIndex];
-                    stack.Push(pr);
-                } else {
-                    break;
-                }*/
-                if(mbd.GetBackOrigin(pr) is MbdFile.Road) {
-                    pr = mbd.nodes[((MbdFile.Road)mbd.GetBackOrigin(pr)).startIndex];
-                    stack.Push(pr);
-                } else {
-                    break;
-                }
-            }
-
-            bz.controlPoints=new Transform[stack.Count];
-            bz.nodes=new Bezier.BezierNode[stack.Count];
-
-
-            Node temp;
-            for(int j = 0;stack.Count>0;j++) {
-                temp = stack.Pop();
-                //Debug.Log("出栈");
-
-                Vector3 pos = temp.position.GetVector();
-                GameObject item = new GameObject("road_"+temp.thisOrigin);
-                item.transform.position=pos;
-                item.transform.parent=root.transform;
-
-                //bz.controlPoints[j] = item.transform;
-                bz.nodes[j]=new Bezier.BezierNode {
-                    position = pos,
-                    tangent=temp.direction.GetVector()
-                };
-
-                if(temp.thisOrigin!=0xFFFFFFFF && mbd.origins[temp.thisOrigin].nodeType==OriginType.Road) {
-                    MbdFile.Road road1 = (MbdFile.Road)mbd.origins[temp.thisOrigin];
-                    bz.nodes[j].length = road1.tangent/3;
-                    bz.nodes[j].width = (G.I.loadWorld.road[road1.roadNum].roadSize+
-                        G.I.loadWorld.road[road1.roadNum].roadOffset)*2;
-                    bz.nodes[j].road = road1;
-
-                    if((road1.flag & 0x01000000) == 0x01000000) {
-                        //平滑
-                        bz.nodes[j].segmentNum = System.Math.Max((uint)(bz.nodes[j].length*0.4f),1);
-                    } else {
-                        bz.nodes[j].segmentNum = System.Math.Max((uint)(bz.nodes[j].length*0.2f),1);
-                    }
-                    
-                } else {
-                    bz.nodes[j].length = bz.nodes[j-1].length;
-                    bz.nodes[j].width = bz.nodes[j-1].width;
-                    bz.nodes[j].road = bz.nodes[j-1].road;
-                    bz.nodes[j].segmentNum=bz.nodes[j-1].segmentNum;
-                }
-                
-            }
-            //bz.nodes[bz.nodes.Length-1].tangent=bz.nodes[bz.nodes.Length-2].tangent;
-            bz.show=true;
-
-            if((road.flag & 0x00010000)==0x00010000) {
-                //i是地形
-                bz.UpadteTerrain(G.I.loadWorld.terMats[road.matNum]);
-            } else {
-                bz.UpdateMesh();
-            }
-        }
-    }
-
-    void LoadRoad2(MbdFile.Road road) {
-        uint i = mbd.nodes[road.startIndex].thisOrigin;
-        if(mbd.nodes[road.endIndex].thisOrigin==0xFFFFFFFF || mbd.GetThisOrigin(mbd.nodes[road.endIndex]).nodeType!=OriginType.Road) {
-            //一段路结束
-            Debug.Log(i+"是Road");
-            Debug.Log(i+"是Road结束");
-            //return;
-        }
 
         GameObject root = new GameObject("root_"+i);
         Bezier bz = root.AddComponent<Bezier>();
-
-        bz.controlPoints=new Transform[2];
-        bz.nodes=new Bezier.BezierNode[2];
+        //bz.controlPoints=new Transform[2];
+        //bz.nodes=new Bezier.BezierNode[2];
 
 
         //开头node
         Node nodeStart = mbd.GetNode(road.startIndex);
-        Vector3 pos = nodeStart.position.GetVector();
+        Vector3 pos = nodeStart.Position;
+
+        root.transform.position=pos;
+
         GameObject item = new GameObject("road_"+nodeStart.thisOrigin);
-        item.transform.position=pos;
+        item.transform.position = pos;
+        item.transform.rotation = Quaternion.FromToRotation(Vector3.right, nodeStart.Direction);
+
+        //print(nodeStart.Direction);
         item.transform.parent=root.transform;
 
-        //bz.controlPoints[j] = item.transform;
-        bz.nodes[0]=new Bezier.BezierNode {
+        bz.nodeStart = new Bezier.BezierNode {
             position = pos,
             tangent=nodeStart.direction.GetVector()
         };
 
         MbdFile.Road road1 = (MbdFile.Road)mbd.origins[nodeStart.thisOrigin];
-        bz.nodes[0].length = road1.tangent/3;
-        bz.nodes[0].width = (G.I.loadWorld.road[road1.roadNum].roadSize + G.I.loadWorld.road[road1.roadNum].roadOffset) * 2;
-        bz.nodes[0].road = road1;
+        bz.nodeStart.length = road1.tangent/3;
+        bz.nodeStart.width = (G.I.loadWorld.road[road1.roadNum].roadSize + G.I.loadWorld.road[road1.roadNum].roadOffset) * 2;
+        bz.nodeStart.road = road1;
         if(G.GetFlag(road1.flag,0x01000000)) {
             //平滑
-            bz.nodes[0].segmentNum = System.Math.Max((uint)(bz.nodes[0].length*0.4f),1);
+            bz.nodeStart.segmentNum = System.Math.Max((uint)(bz.nodeStart.length*0.4f),1);
         } else {
-            bz.nodes[0].segmentNum = System.Math.Max((uint)(bz.nodes[0].length*0.2f),1);
+            bz.nodeStart.segmentNum = System.Math.Max((uint)(bz.nodeStart.length*0.2f),1);
         }
 
         //结尾node
         Node nodeEnd = mbd.GetNode(road.endIndex);
-        Vector3 pos2 = nodeEnd.position.GetVector();
+        Vector3 pos2 = nodeEnd.Position;
+
         GameObject item2 = new GameObject("road_"+nodeEnd.thisOrigin);
         item2.transform.position=pos2;
+        item2.transform.rotation = Quaternion.FromToRotation(Vector3.right,nodeEnd.Direction);
         item2.transform.parent=root.transform;
-        bz.nodes[1]=new Bezier.BezierNode {
+
+        bz.nodeEnd=new Bezier.BezierNode {
             position = pos2,
             tangent=nodeEnd.direction.GetVector()
         };
-        bz.nodes[1].length = bz.nodes[0].length;
-        bz.nodes[1].width = bz.nodes[0].width;
-        bz.nodes[1].road = bz.nodes[0].road;
-        bz.nodes[1].segmentNum=bz.nodes[0].segmentNum;
+        bz.nodeEnd.length = bz.nodeStart.length;
+        bz.nodeEnd.width = bz.nodeStart.width;
+        bz.nodeEnd.road = bz.nodeStart.road;
+        bz.nodeEnd.segmentNum=bz.nodeStart.segmentNum;
 
         bz.show=true;
 

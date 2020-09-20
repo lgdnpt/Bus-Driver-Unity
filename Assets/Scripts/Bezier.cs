@@ -18,7 +18,9 @@ public class Bezier : MonoBehaviour {
     public RoadType roadType;
 
     public Transform[] controlPoints;
-    public BezierNode[] nodes;
+    //public BezierNode[] nodes;
+    public BezierNode nodeStart;
+    public BezierNode nodeEnd;
     
     public MeshFilter filterBase;
     public MeshRenderer renderBase;
@@ -38,35 +40,35 @@ public class Bezier : MonoBehaviour {
         }
     }
 
-    void DrawCurve(bool fixedLength) {
-        if(nodes.Length<=1) {
-            Debug.LogWarning("有内鬼|"+gameObject.name);
-            return;
-        }
-
-        //计算位置
-        if(!fixedLength) {
-            for(int i = 0;i<controlPoints.Length;i++) {
-                nodes[i].position=controlPoints[i].position;
-            }
-        }
+    /*void DrawCurve(bool fixedLength) {
+        
         
 
         Gizmos.color = Color.red;
-        Vector3 ppp1 = nodes[1].position-nodes[0].position, ppp2;            //计算切线和长度
+        Vector3 ppp1 = nodeEnd.position-nodeStart.position, ppp2;            //计算切线和长度
 
         for(int i = 0;i<nodes.Length-1;i++) {
-            if(!fixedLength) {
-                ppp2 = ppp1;
-                ppp1 = nodes[i+1].position-nodes[i].position;
-                nodes[i].length=Distance(nodes[i].position,nodes[i+1].position)/3;//Vector3.Distance(nodes[i+1].position,nodes[i].position)/4;
-                nodes[i].tangent=(ppp1.normalized+ppp2.normalized).normalized;
-            }
-            nodes[i].segmentNum=(uint)(nodes[i].length*optimize);
-
-            //画切线
-            Gizmos.DrawLine(nodes[i].position,nodes[i].position+(nodes[i].length*nodes[i].tangent));
+            
         }
+        if(!fixedLength) {
+            ppp2 = ppp1;
+            ppp1 = nodeEnd.position-nodeStart.position;
+            nodeStart.length=Distance(nodeStart.position,nodeEnd.position)/3;//Vector3.Distance(nodes[i+1].position,nodes[i].position)/4;
+            nodeStart.tangent=(ppp1.normalized+ppp2.normalized).normalized;
+        }
+        nodeStart.segmentNum=(uint)(nodeStart.length*optimize);
+        //画切线
+        Gizmos.DrawLine(nodes[i].position,nodes[i].position+(nodes[i].length*nodes[i].tangent));
+        if(!fixedLength) {
+            ppp2 = ppp1;
+            ppp1 = nodes[i+1].position-nodes[i].position;
+            nodes[i].length=Distance(nodes[i].position,nodes[i+1].position)/3;//Vector3.Distance(nodes[i+1].position,nodes[i].position)/4;
+            nodes[i].tangent=(ppp1.normalized+ppp2.normalized).normalized;
+        }
+        nodes[i].segmentNum=(uint)(nodes[i].length*optimize);
+        //画切线
+        Gizmos.DrawLine(nodes[i].position,nodes[i].position+(nodes[i].length*nodes[i].tangent));
+
 
         if(nodes.Length>2) {
             if(fixedLength) { 
@@ -89,7 +91,7 @@ public class Bezier : MonoBehaviour {
                 start=end;
             }
         }
-    }
+    }*/
 
     Vector3 CalculateBezierPoint(Vector3 p0,Vector3 p1,Vector3 c1,Vector3 c2,float t) {
         float u = 1-t;
@@ -109,8 +111,8 @@ public class Bezier : MonoBehaviour {
     }
 
 
-    public void NodeInit() {
-        Vector3 ppp1 = nodes[1].position-nodes[0].position, ppp2;            //计算切线和长度
+/*    public void NodeInit() {
+        Vector3 ppp1 = nodeEnd.position-nodeStart.position, ppp2;            //计算切线和长度
         for(int i = 0;i<nodes.Length-1;i++) {
             ppp2 = ppp1;
             ppp1 = nodes[i+1].position-nodes[i].position;
@@ -121,48 +123,47 @@ public class Bezier : MonoBehaviour {
             nodes[nodes.Length-1].tangent=(nodes[nodes.Length-1].position-nodes[nodes.Length-2].position).normalized;
             nodes[nodes.Length-1].length=Distance(nodes[nodes.Length-1].position,nodes[nodes.Length-2].position)/3;
         }
-    }
+    }*/
     private Vector3 start, end;
     public void UpdateMesh() {
-        //初始化节点
-        if(!fixedLength)
-            NodeInit();
-
         List<Vector3> vertices = new List<Vector3>();
         List<Vector2> uvs = new List<Vector2>();
 
         Vector3 leftV, rightV, left;
         Vector3 c1, c2, fwd;
         int faceCount = 0;
-        start = nodes[0].position-transform.position;
-        for(int nodeIndex = 0;nodeIndex<nodes.Length-1;nodeIndex++) {
-            //遍历每一段
-            for(int i = 1;i <= nodes[nodeIndex].segmentNum;i++) {
-                //每段从头到尾
-                float t = i / (float)nodes[nodeIndex].segmentNum;
+        start = nodeStart.position-transform.position;
 
-                c1 = nodes[nodeIndex].position+ nodes[nodeIndex].tangent *nodes[nodeIndex].length;
-                c2 = nodes[nodeIndex+1].position- nodes[nodeIndex+1].tangent *nodes[nodeIndex].length;
-                end = CalculateBezierPoint(nodes[nodeIndex].position,nodes[nodeIndex+1].position,c1,c2,t)-transform.position;
-                fwd= CalculateBezierTangent(nodes[nodeIndex].position,nodes[nodeIndex+1].position,c1,c2,t);
-                left=Vector3.ProjectOnPlane(Quaternion.AngleAxis(-90,Vector3.up)*fwd,Vector3.up).normalized;
-                
-                //画线(生成网格点)
-                leftV=start+(nodes[nodeIndex].width/2)*left;
-                rightV=start-(nodes[nodeIndex].width/2)*left;
-                vertices.Add(leftV);
-                vertices.Add(rightV);
-                uvs.Add(new Vector2(0,0));
-                uvs.Add(new Vector2(0,1));
-                faceCount++;
-                start = end;
-            }
+        
+        for(int i = 1;i <= nodeStart.segmentNum;i++) {
+            //每段从头到尾
+            float t = i / (float)nodeStart.segmentNum;
+
+            c1 = nodeStart.position + nodeStart.tangent * nodeStart.length;
+            c2 = nodeEnd.position - nodeEnd.tangent * nodeStart.length;
+
+            end = CalculateBezierPoint(nodeStart.position, nodeEnd.position, c1, c2, t)-transform.position;
+            if(i==1) fwd = nodeStart.tangent;
+            else if(i==nodeStart.segmentNum) fwd = nodeEnd.tangent;
+            else fwd = CalculateBezierTangent(nodeStart.position, nodeEnd.position, c1, c2, t);
+            left = Vector3.ProjectOnPlane(Quaternion.AngleAxis(-90,Vector3.up)*fwd,Vector3.up).normalized;
+
+            //画线(生成网格点)
+            leftV = start + (nodeStart.width/2)*left;
+            rightV = start - (nodeStart.width/2)*left;
+            vertices.Add(leftV);
+            vertices.Add(rightV);
+            uvs.Add(new Vector2(0,0));
+            uvs.Add(new Vector2(0,1));
+            faceCount++;
+            start = end;
         }
-        if(nodes.Length>1) { }
-        fwd= nodes[nodes.Length-1].tangent;
-        left=Vector3.ProjectOnPlane(Quaternion.AngleAxis(-90,Vector3.up)*fwd,Vector3.up).normalized;
-        leftV=start+(nodes[nodes.Length-1].width/2)*left;
-        rightV=start-(nodes[nodes.Length-1].width/2)*left;
+
+        
+        fwd = nodeEnd.tangent;
+        left = Vector3.ProjectOnPlane(Quaternion.AngleAxis(-90,Vector3.up)*fwd, Vector3.up).normalized;
+        leftV = start + (nodeEnd.width/2)*left;
+        rightV = start - (nodeEnd.width/2)*left;
         vertices.Add(leftV);
         vertices.Add(rightV);
         uvs.Add(new Vector2(0,0));
@@ -188,7 +189,6 @@ public class Bezier : MonoBehaviour {
         };
         meshBase.RecalculateNormals();  //计算法线
         /*
-        mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         mesh.RecalculateTangents();*/
 
@@ -202,13 +202,10 @@ public class Bezier : MonoBehaviour {
     
 
     public void UpadteTerrain(Material mat) {
-        //for(int i = 0;i<nodes.Length-1;i++) {
-        //    nodes[i].segmentNum=(uint)(nodes[i].length*optimize);
-        //}
-
-
         GameObject terrain = new GameObject("terrain");
+        //terrain.transform.position = transform.position;
         terrain.transform.parent = transform;
+        //terrain.transform.localPosition=Vector3.zero;
 
         List<Vector3> vertices = new List<Vector3>();
         List<Vector2> uvs = new List<Vector2>();
@@ -216,68 +213,97 @@ public class Bezier : MonoBehaviour {
 
         Vector3 pos;
         Vector3 c1, c2, fwd, right;
-        LoadWorld.TerrainProfile profile = G.I.loadWorld.terProfile[nodes[0].road.dataRight.terrType];
+        LoadWorld.TerrainProfile profile = G.I.loadWorld.terProfile[nodeStart.road.dataRight.terrType];
 
         //添加第一条边
-        start = nodes[0].position-terrain.transform.position;
-        fwd= nodes[0].tangent;
+        float step = 0, height = 0;
+        start = nodeStart.position-terrain.transform.position;
+        fwd= nodeStart.tangent;
         right=Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up)*fwd,Vector3.up).normalized;
         vertices.Add(start);
         uvs.Add(new Vector2(start.x,start.z));
 
-        float step = 0, height = 0;
-        for(int j = 1;j<=nodes[0].road.dataRight.terrQuad;j++) {
+        for(int j = 1;j<= nodeStart.road.dataRight.terrQuad;j++) {
             //地形网格从内到外
-            step+=profile.step[Mathf.Min(j-1,profile.step.Length-1)];
-            height+=profile.height[Mathf.Min(j,profile.height.Length-1)];
-            pos=start+ step*right + nodes[0].road.dataRight.terrCoef*height*Vector3.up;
+            step += profile.step[Mathf.Min(j-1,profile.step.Length-1)];
+            height += profile.height[Mathf.Min(j,profile.height.Length-1)];
+            pos = start + step*right + nodeStart.road.dataRight.terrCoef*height*Vector3.up;
             vertices.Add(pos);
             uvs.Add(new Vector2(pos.x,pos.z));
         }
 
         ushort quad;
-        for(int nodeIndex = 0;nodeIndex<nodes.Length-1;nodeIndex++) {
+        quad = nodeStart.road.dataRight.terrQuad;
+        profile = G.I.loadWorld.terProfile[nodeStart.road.dataRight.terrType];
 
-            //关键段从头到尾
-            quad = nodes[nodeIndex].road.dataRight.terrQuad;
-            profile = G.I.loadWorld.terProfile[nodes[nodeIndex].road.dataRight.terrType];
+        c1 = nodeStart.position + nodeStart.tangent * nodeStart.length;
+        c2 = nodeEnd.position- nodeEnd.tangent * nodeStart.length;
+        for(int i = 1;i <= nodeStart.segmentNum;i++) {
+            //插值段从头到尾
+            float t = i / (float)nodeStart.segmentNum;
+            end = CalculateBezierPoint(nodeStart.position, nodeEnd.position, c1,c2,t)-terrain.transform.position;
 
-            c1 = nodes[nodeIndex].position+ nodes[nodeIndex].tangent *nodes[nodeIndex].length;
-            c2 = nodes[nodeIndex+1].position- nodes[nodeIndex+1].tangent *nodes[nodeIndex].length;
-            for(int i = 1;i <= nodes[nodeIndex].segmentNum;i++) {
-                //插值段从头到尾
-                float t = i / (float)nodes[nodeIndex].segmentNum;
-                end = CalculateBezierPoint(nodes[nodeIndex].position,nodes[nodeIndex+1].position,c1,c2,t)-terrain.transform.position;
-                fwd= CalculateBezierTangent(nodes[nodeIndex].position,nodes[nodeIndex+1].position,c1,c2,t);
-                right=Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up)*fwd,Vector3.up).normalized;
+            if(i==1) fwd = nodeStart.tangent;
+            else if(i==nodeStart.segmentNum) fwd = nodeEnd.tangent;
+            else fwd = CalculateBezierTangent(nodeStart.position,nodeEnd.position,c1,c2,t);
 
-                pos=end;
+            right = Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up)*fwd, Vector3.up).normalized;
+
+            pos=end;
+            vertices.Add(pos);
+            uvs.Add(new Vector2(pos.x,pos.z));
+
+            step = 0; height = 0;
+            //Debug.Log(nodes[nodeIndex].road.dataRight.terrCoef);
+            for(int j = 1; j<=quad; j++) {
+                //地形网格从内到外
+                step += profile.step[Mathf.Min(j-1, profile.step.Length-1)];
+                height += profile.height[Mathf.Min(j, profile.height.Length-1)];
+
+                pos = end + step*right + nodeStart.road.dataRight.terrCoef*height*Vector3.up;
+                int vIndex = vertices.Count;
                 vertices.Add(pos);
                 uvs.Add(new Vector2(pos.x,pos.z));
-
-                step = 0; height = 0;
-                //Debug.Log(nodes[nodeIndex].road.dataRight.terrCoef);
-                for(int j = 1; j<=quad; j++) {
-                    //地形网格从内到外
-                    step+=profile.step[Mathf.Min(j-1,profile.step.Length-1)];
-                    height+=profile.height[Mathf.Min(j,profile.height.Length-1)];
-
-                    pos=end+ step*right + nodes[nodeIndex].road.dataRight.terrCoef*height*Vector3.up;
-                    int vIndex = vertices.Count;
-                    vertices.Add(pos);
-                    uvs.Add(new Vector2(pos.x,pos.z));
-                    triangles.Add(vIndex);
-                    triangles.Add(vIndex-quad-2);
-                    triangles.Add(vIndex-1);
-                    triangles.Add(vIndex);
-                    triangles.Add(vIndex-quad-1);
-                    triangles.Add(vIndex-quad-2);
-                }
-                start = end;
+                triangles.Add(vIndex);
+                triangles.Add(vIndex-quad-2);
+                triangles.Add(vIndex-1);
+                triangles.Add(vIndex);
+                triangles.Add(vIndex-quad-1);
+                triangles.Add(vIndex-quad-2);
             }
+            start = end;
         }
+        //====================================
+        //插值段从头到尾
+        end = nodeEnd.position;
+        fwd = nodeEnd.tangent;
 
-        //nodes[nodeIndex].road.matNum
+        right = Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up)*fwd,Vector3.up).normalized;
+
+        pos=end;
+        vertices.Add(pos);
+        uvs.Add(new Vector2(pos.x,pos.z));
+
+        step = 0; height = 0;
+        //Debug.Log(nodes[nodeIndex].road.dataRight.terrCoef);
+        for(int j = 1;j<=quad;j++) {
+            //地形网格从内到外
+            step += profile.step[Mathf.Min(j-1,profile.step.Length-1)];
+            height += profile.height[Mathf.Min(j,profile.height.Length-1)];
+
+            pos = end + step*right + nodeStart.road.dataRight.terrCoef*height*Vector3.up;
+            int vIndex = vertices.Count;
+            vertices.Add(pos);
+            uvs.Add(new Vector2(pos.x,pos.z));
+            triangles.Add(vIndex);
+            triangles.Add(vIndex-quad-2);
+            triangles.Add(vIndex-1);
+            triangles.Add(vIndex);
+            triangles.Add(vIndex-quad-1);
+            triangles.Add(vIndex-quad-2);
+        }
+        start = end;
+        //====================================
 
         Mesh mesh = new Mesh {
             name=terrain.name,
@@ -293,4 +319,119 @@ public class Bezier : MonoBehaviour {
         terrain.AddComponent<MeshCollider>();
     }
 
+    public void UpadteTerrain2(Material mat) {
+        GameObject terrain = new GameObject("terrain");
+        terrain.transform.parent = transform;
+
+        List<Vector3> vertices = new List<Vector3>();
+        List<Vector2> uvs = new List<Vector2>();
+        List<int> triangles = new List<int>();
+
+        Vector3 pos;
+        Vector3 c1, c2, fwd, right;
+        LoadWorld.TerrainProfile profile = G.I.loadWorld.terProfile[nodeStart.road.dataRight.terrType];
+
+        //添加第一条边
+        float step = 0, height = 0;
+        start = nodeStart.position-terrain.transform.position;
+        fwd= nodeStart.tangent;
+        right=Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up)*fwd,Vector3.up).normalized;
+        vertices.Add(start);
+        uvs.Add(new Vector2(start.x,start.z));
+
+        for(int j = 1;j<= nodeStart.road.dataRight.terrQuad;j++) {
+            //地形网格从内到外
+            step += profile.step[Mathf.Min(j-1,profile.step.Length-1)];
+            height += profile.height[Mathf.Min(j,profile.height.Length-1)];
+            pos = start + step*right + nodeStart.road.dataRight.terrCoef*height*Vector3.up;
+            vertices.Add(pos); 
+            uvs.Add(new Vector2(pos.x,pos.z));
+        }
+
+        ushort quad;
+        quad = nodeStart.road.dataRight.terrQuad;
+        profile = G.I.loadWorld.terProfile[nodeStart.road.dataRight.terrType];
+
+        c1 = nodeStart.position + nodeStart.tangent * nodeStart.length;
+        c2 = nodeEnd.position- nodeEnd.tangent * nodeStart.length;
+        for(int i = 1;i <= nodeStart.segmentNum;i++) {
+            //插值段从头到尾
+            float t = i / (float)nodeStart.segmentNum;
+            end = CalculateBezierPoint(nodeStart.position,nodeEnd.position,c1,c2,t)-terrain.transform.position;
+
+            if(i==1) fwd = nodeStart.tangent;
+            else if(i==nodeStart.segmentNum) fwd = nodeEnd.tangent;
+            else fwd = CalculateBezierTangent(nodeStart.position,nodeEnd.position,c1,c2,t);
+
+            right = Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up)*fwd,Vector3.up).normalized;
+
+            pos=end;
+            vertices.Add(pos);
+            uvs.Add(new Vector2(pos.x,pos.z));
+
+            step = 0; height = 0;
+            //Debug.Log(nodes[nodeIndex].road.dataRight.terrCoef);
+            for(int j = 1;j<=quad;j++) {
+                //地形网格从内到外
+                step += profile.step[Mathf.Min(j-1,profile.step.Length-1)];
+                height += profile.height[Mathf.Min(j,profile.height.Length-1)];
+
+                pos = end + step*right + nodeStart.road.dataRight.terrCoef*height*Vector3.up;
+                int vIndex = vertices.Count;
+                vertices.Add(pos);
+                uvs.Add(new Vector2(pos.x,pos.z));
+                triangles.Add(vIndex);
+                triangles.Add(vIndex-quad-2);
+                triangles.Add(vIndex-1);
+                triangles.Add(vIndex);
+                triangles.Add(vIndex-quad-1);
+                triangles.Add(vIndex-quad-2);
+            }
+            start = end;
+        }
+        //====================================
+        //插值段从头到尾
+        end = nodeEnd.position;
+        fwd = nodeEnd.tangent;
+
+        right = Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up)*fwd,Vector3.up).normalized;
+
+        pos=end;
+        vertices.Add(pos);
+        uvs.Add(new Vector2(pos.x,pos.z));
+
+        step = 0; height = 0;
+        //Debug.Log(nodes[nodeIndex].road.dataRight.terrCoef);
+        for(int j = 1;j<=quad;j++) {
+            //地形网格从内到外
+            step += profile.step[Mathf.Min(j-1,profile.step.Length-1)];
+            height += profile.height[Mathf.Min(j,profile.height.Length-1)];
+
+            pos = end + step*right + nodeStart.road.dataRight.terrCoef*height*Vector3.up;
+            int vIndex = vertices.Count;
+            vertices.Add(pos);
+            uvs.Add(new Vector2(pos.x,pos.z));
+            triangles.Add(vIndex);
+            triangles.Add(vIndex-quad-2);
+            triangles.Add(vIndex-1);
+            triangles.Add(vIndex);
+            triangles.Add(vIndex-quad-1);
+            triangles.Add(vIndex-quad-2);
+        }
+        start = end;
+        //====================================
+
+        Mesh mesh = new Mesh {
+            name=terrain.name,
+            vertices = vertices.ToArray(),
+            uv = uvs.ToArray(),
+            triangles = triangles.ToArray() //三角面
+        };
+        mesh.Optimize();
+        mesh.RecalculateNormals();
+
+        terrain.AddComponent<MeshFilter>().mesh = mesh;
+        terrain.AddComponent<MeshRenderer>().material = mat;
+        terrain.AddComponent<MeshCollider>();
+    }
 }
