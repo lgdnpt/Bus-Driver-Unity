@@ -477,7 +477,7 @@ public class Bezier : MonoBehaviour {
             if(terL) {
                 //生成地形网格点 左
                 verticesL.Add(thisPos + terOffsetL);
-                uvsL.Add(new Vector2(thisPos.x,thisPos.z));
+                uvsL.Add(new Vector2((thisPos + terOffsetL).x,(thisPos + terOffsetL).z));
                 step = 0;
                 for(int j = 1;j<=quadL;j++) {
                     //地形网格从内到外
@@ -493,7 +493,7 @@ public class Bezier : MonoBehaviour {
             if(terR) {
                 //生成地形网格点 右
                 verticesR.Add(thisPos + terOffsetR);
-                uvsR.Add(new Vector2(thisPos.x,thisPos.z));
+                uvsR.Add(new Vector2((thisPos + terOffsetR).x,(thisPos + terOffsetR).z));
                 step = 0;
                 for(int j = 1;j<=quadR;j++) {
                     //地形网格从内到外
