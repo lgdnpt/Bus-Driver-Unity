@@ -52,7 +52,7 @@ class G:Singleton<G>{
     }
 
     public static bool GetFlag(uint res,uint flag) => (res & flag) == flag;
-
+    
 
     public static Color HexToABGR(string strHex) {
         if(strHex.Length != 8) return Color.white;

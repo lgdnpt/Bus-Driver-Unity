@@ -129,9 +129,6 @@ public class Bezier : MonoBehaviour {
             uvs = new List<Vector2>();
             triangles = new List<int>();
         }
-        /*public void AddVert(Vector3 pos) => vertices.Add(pos);
-        public void AddUV(Vector2 uv) => uvs.Add(uv);
-        public void AddTriangles(int index) => triangles.Add(index);*/
         public void Add(Vector3 pos) => vertices.Add(pos);
         public void Add(Vector2 uv) => uvs.Add(uv);
         public void Add(int index) => triangles.Add(index);
@@ -147,7 +144,8 @@ public class Bezier : MonoBehaviour {
     }
 
     public void UpdateMeshWithTerrain() {
-        bool terL, terR, hasRoad, hasSidewalk=false;
+        bool terL, terR, hasRoad;
+        bool hasSide=false, hasSideL=false, hasSideR=false;
         ushort quadL = road.dataLeft.terrQuad;
         ushort quadR = road.dataRight.terrQuad;
 
@@ -158,32 +156,46 @@ public class Bezier : MonoBehaviour {
         } else {
             //道路
             hasRoad=true;
-            if(quadL>0) terL=true; else terL=false;
-            if(G.GetFlag(road.flag, (uint)MbdFile.Road.Flag.CityRoad)) hasSidewalk=true;
-            else hasSidewalk=false;
+            terL = quadL>0;
+            hasSide = G.GetFlag(road.flag, (uint)MbdFile.Road.Flag.CityRoad);
         }
-        if(quadR>0) terR=true; else terR=false;
-
+        terR = quadR>0;
 
         MeshParams meshRoad = hasRoad ? new MeshParams() : null;
         MeshParams meshTerL = terL ? new MeshParams() : null;
         MeshParams meshTerR = terR ? new MeshParams() : null;
+        MeshParams meshSide = hasSide ? new MeshParams() : null;
+        MeshParams meshSideLP = hasSide ? new MeshParams() : null;
+        MeshParams meshSideRP = hasSide ? new MeshParams() : null;
 
-        Vector3 leftV, rightV;
-
+        //曲线相关
         Vector3 thisPos;    //曲线上的点
-        Vector3 fwd, right; //方向向量
-        
         Vector3 c1 = nodeStart.position + nodeStart.tangent * nodeStart.length;
         Vector3 c2 = nodeEnd.position - nodeEnd.tangent * nodeStart.length;
+        Vector3 fwd, right; //方向向量
+
+        //道路相关
+        Vector3 leftV, rightV;
+
+        //人行道相关
+        float widthL=0f, widthR=0f;
+        if(hasSide) {
+            widthL = road.SidewalkWidthL;
+            widthR = road.SidewalkWidthR;
+            if(widthL>0f) hasSideL=true;
+            if(widthR>0f) hasSideR=true;
+            print("人行道 左:"+widthL+"\t|右"+widthR);
+        }
 
         //地形相关
         Vector3 pos;   //地形网格点位置
-        Vector3 terOffsetL, terOffsetR; //地形偏移
+        Vector3 offsetL, offsetR; //地形偏移
         float step, height;
         LoadWorld.TerrainProfile profileL = G.I.loadWorld.terProfile[road.dataLeft.terrType];
         LoadWorld.TerrainProfile profileR = G.I.loadWorld.terProfile[road.dataRight.terrType];
 
+        //=====================================================
+        //生成网格顶点
         for(int i = 0;i <= nodeStart.segmentNum;i++) {
             //每段从头到尾
             if(i == 0) {
@@ -199,36 +211,73 @@ public class Bezier : MonoBehaviour {
             }
             right = Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up) * fwd,Vector3.up).normalized;
 
-            terOffsetL = Vector3.zero;
-            terOffsetR = Vector3.zero;
+            offsetL = Vector3.zero;
+            offsetR = Vector3.zero;
             if(hasRoad) {
                 //生成路面网格点
                 leftV = thisPos - (nodeStart.width/2)*right;
                 rightV = thisPos + (nodeStart.width/2)*right;
                 meshRoad.Add(leftV);
                 meshRoad.Add(rightV);
-                terOffsetL = -(nodeStart.width/2)*right;
-                terOffsetR = (nodeStart.width/2)*right;
                 meshRoad.Add(new Vector2(0,i/(nodeStart.length/nodeStart.segmentNum)));
                 meshRoad.Add(new Vector2(1,i/(nodeStart.length/nodeStart.segmentNum)));
+
+                offsetL = -nodeStart.width/2*right;
+                offsetR = nodeStart.width/2*right;
+                if(hasSide) {
+                    //生成人行道
+
+                    //左路牙
+                    meshSide.Add(thisPos + offsetL);
+                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                    offsetL += 0.2f * Vector3.up;
+                    meshSide.Add(thisPos + offsetL);
+                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                    offsetL -= 0.2f * right;
+                    meshSide.Add(thisPos + offsetL);
+                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+
+                    //右路牙
+                    meshSide.Add(thisPos + offsetR);
+                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                    offsetR += 0.2f * Vector3.up;
+                    meshSide.Add(thisPos + offsetR);
+                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                    offsetR += 0.2f * right;
+                    meshSide.Add(thisPos + offsetR);
+                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+
+                    if(hasSideL) {
+                        //左平面
+                        meshSideLP.Add(thisPos + offsetL);
+                        meshSideLP.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                        offsetL -= widthL*right;
+                        meshSideLP.Add(thisPos + offsetL);
+                        meshSideLP.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                    }
+                    if(hasSideR) {
+                        //右平面
+                        meshSideRP.Add(thisPos + offsetR);
+                        meshSideRP.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                        offsetR += widthR*right;
+                        meshSideRP.Add(thisPos + offsetR);
+                        meshSideRP.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                    }
+                }
             }
 
-            if(hasSidewalk) {
-                //生成人行道
-
-            }
 
             if(terL) {
                 //生成地形网格点 左
-                meshTerL.Add(thisPos + terOffsetL);
-                meshTerL.Add(new Vector2((thisPos + terOffsetL).x*0.5f,(thisPos + terOffsetL).z*0.5f));
+                meshTerL.Add(thisPos + offsetL);
+                meshTerL.Add(new Vector2((thisPos + offsetL).x*0.5f,(thisPos + offsetL).z*0.5f));
                 step = 0;
                 for(int j = 1;j<=quadL;j++) {
                     //地形网格从内到外
                     step += profileL.step[Mathf.Min(j-1,profileL.step.Length-1)];
                     if(j>profileL.height.Length) height=0;
                     else height = profileL.height[Mathf.Min(j,profileL.height.Length-1)];
-                    pos = thisPos + terOffsetL - step*right + road.dataLeft.terrCoef * height * Vector3.up;
+                    pos = thisPos + offsetL - step*right + road.dataLeft.terrCoef * height * Vector3.up;
                     meshTerL.Add(pos);
                     meshTerL.Add(new Vector2(pos.x*0.5f,pos.z*0.5f));
                 }
@@ -236,8 +285,8 @@ public class Bezier : MonoBehaviour {
 
             if(terR) {
                 //生成地形网格点 右
-                meshTerR.Add(thisPos + terOffsetR);
-                meshTerR.Add(new Vector2((thisPos + terOffsetR).x*0.5f,(thisPos + terOffsetR).z*0.5f));
+                meshTerR.Add(thisPos + offsetR);
+                meshTerR.Add(new Vector2((thisPos + offsetR).x*0.5f,(thisPos + offsetR).z*0.5f));
                 step = 0;
                 for(int j = 1;j<=quadR;j++) {
                     //地形网格从内到外
@@ -245,7 +294,7 @@ public class Bezier : MonoBehaviour {
                     if(j>profileR.height.Length) height=0;
                     else height = profileR.height[Mathf.Min(j,profileR.height.Length-1)];
 
-                    pos = thisPos + terOffsetR + step*right + road.dataRight.terrCoef * height * Vector3.up;
+                    pos = thisPos + offsetR + step*right + road.dataRight.terrCoef * height * Vector3.up;
                     meshTerR.Add(pos);
                     meshTerR.Add(new Vector2(pos.x*0.5f,pos.z*0.5f));
                 }
@@ -253,16 +302,72 @@ public class Bezier : MonoBehaviour {
 
         }
 
-        //连接路面三角形
+        //=====================================================
+        //连接三角形
         int terIndex;
         for(int index = 1; index<=nodeStart.segmentNum; index++) {
             if(hasRoad) {
+                //连接路面三角形
                 meshRoad.Add(index*2);
                 meshRoad.Add(index*2 +1);
                 meshRoad.Add(index*2 -2);
                 meshRoad.Add(index*2 +1);
                 meshRoad.Add(index*2 -1);
                 meshRoad.Add(index*2 -2);
+
+                if(hasSide) {
+                    //连接人行道三角形
+                    //左_侧面
+                    meshSide.Add(index*6);
+                    meshSide.Add(index*6 -6);
+                    meshSide.Add(index*6 -5);
+                    meshSide.Add(index*6);
+                    meshSide.Add(index*6 -5);
+                    meshSide.Add(index*6 +1);
+                    //左_上面
+                    meshSide.Add(index*6 +1);
+                    meshSide.Add(index*6 -5);
+                    meshSide.Add(index*6 -4);
+                    meshSide.Add(index*6 +1);
+                    meshSide.Add(index*6 -4);
+                    meshSide.Add(index*6 +2);
+
+                    //右_侧面
+                    meshSide.Add(index*6 +4);
+                    meshSide.Add(index*6 -2);
+                    meshSide.Add(index*6 -3);
+                    meshSide.Add(index*6 +4);
+                    meshSide.Add(index*6 -3);
+                    meshSide.Add(index*6 +3);
+                    //右_上面
+                    meshSide.Add(index*6 +5);
+                    meshSide.Add(index*6 -1);
+                    meshSide.Add(index*6 -2);
+                    meshSide.Add(index*6 +5);
+                    meshSide.Add(index*6 -2);
+                    meshSide.Add(index*6 +4);
+
+                    if(hasSideL) {
+                        //左_延伸面
+                        meshSideLP.Add(index*2);
+                        meshSideLP.Add(index*2 -2);
+                        meshSideLP.Add(index*2 +1);
+                        meshSideLP.Add(index*2 +1);
+                        meshSideLP.Add(index*2 -2);
+                        meshSideLP.Add(index*2 -1);
+                    }
+                    if(hasSideR) {
+                        //右_延伸面
+                        meshSideRP.Add(index*2);
+                        meshSideRP.Add(index*2 +1);
+                        meshSideRP.Add(index*2 -2);
+                        meshSideRP.Add(index*2 +1);
+                        meshSideRP.Add(index*2 -1);
+                        meshSideRP.Add(index*2 -2);
+                    }
+
+                
+                }
             }
 
             if(terL) {
@@ -291,6 +396,8 @@ public class Bezier : MonoBehaviour {
             }
         }
 
+        //=====================================================
+        //mesh生成
         if(hasRoad) {
             Mesh meshBase = meshRoad.GetMesh(gameObject.name);
             meshBase.RecalculateNormals();  //计算法线
@@ -299,6 +406,42 @@ public class Bezier : MonoBehaviour {
             filterBase.mesh = meshBase;
             renderBase.material = G.I.dif;
             gameObject.AddComponent<MeshCollider>();
+
+            if(hasSide) {
+                Material matR = G.I.loadWorld.terMats[road.dataRight.terrMatNum];
+                GameObject sideObj = new GameObject("side");
+                sideObj.transform.parent = transform;
+                sideObj.transform.localPosition=Vector3.zero;
+                Mesh meshSideMesh = meshSide.GetMesh(gameObject.name);
+                meshSideMesh.Optimize();
+                meshSideMesh.RecalculateNormals();
+                sideObj.AddComponent<MeshFilter>().mesh = meshSideMesh;
+                sideObj.AddComponent<MeshRenderer>().material = matR;
+                sideObj.AddComponent<MeshCollider>();
+
+                if(hasSideL) {
+                    GameObject sideObjL = new GameObject("side");
+                    sideObjL.transform.parent = transform;
+                    sideObjL.transform.localPosition=Vector3.zero;
+                    Mesh meshSideMeshL = meshSideLP.GetMesh(sideObjL.name);
+                    meshSideMeshL.Optimize();
+                    meshSideMeshL.RecalculateNormals();
+                    sideObjL.AddComponent<MeshFilter>().mesh = meshSideMeshL;
+                    sideObjL.AddComponent<MeshRenderer>().material = matR;
+                    sideObjL.AddComponent<MeshCollider>();
+                }
+                if(hasSideR) {
+                    GameObject sideObjR = new GameObject("side");
+                    sideObjR.transform.parent = transform;
+                    sideObjR.transform.localPosition=Vector3.zero;
+                    Mesh meshSideMeshR = meshSideRP.GetMesh(sideObjR.name);
+                    meshSideMeshR.Optimize();
+                    meshSideMeshR.RecalculateNormals();
+                    sideObjR.AddComponent<MeshFilter>().mesh = meshSideMeshR;
+                    sideObjR.AddComponent<MeshRenderer>().material = matR;
+                    sideObjR.AddComponent<MeshCollider>();
+                }
+            }
         }
 
         if(terL) {

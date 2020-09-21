@@ -170,6 +170,28 @@ namespace fs {
             public override string ToString() {
                 return string.Format("Road(编号:{0:g},材质:{1:g}",roadNum,matNum);
             }
+            public float SidewalkWidthL {
+                get {
+                    float width = 8f;
+                    bool left12 = G.GetFlag(flag, (uint)Flag.LeftSidewalk12);
+                    bool left02 = G.GetFlag(flag, (uint)Flag.LeftSidewalk02);
+                    if(left02 && left12) width = 0f;
+                    else if(left12) width = 12f;
+                    else if(left02) width = 2f;
+                    return width;
+                }
+            }
+            public float SidewalkWidthR {
+                get {
+                    float width = 8f;
+                    bool left12 = G.GetFlag(flag, (uint)Flag.RightSidewalk12);
+                    bool left02 = G.GetFlag(flag, (uint)Flag.RightSidewalk02);
+                    if(left02 && left12) width = 0f;
+                    else if(left12) width = 12f;
+                    else if(left02) width = 2f;
+                    return width;
+                }
+            }
 
             public enum Flag:uint {
                 LeftNoise50 = 0x01,
