@@ -402,7 +402,7 @@ public class Bezier : MonoBehaviour {
     }
 
     public void UpdateMeshWithTerrain() {
-        bool terL, terR, hasRoad;
+        bool terL, terR, hasRoad, hasSidewalk=false;
         ushort quadL = nodeStart.road.dataLeft.terrQuad;
         ushort quadR = nodeStart.road.dataRight.terrQuad;
 
@@ -414,6 +414,8 @@ public class Bezier : MonoBehaviour {
             //道路
             hasRoad=true;
             if(quadL>0) terL=true; else terL=false;
+            if(G.GetFlag(nodeStart.road.flag,(uint)MbdFile.Road.Flag.CityRoad)) hasSidewalk=true;
+            else hasSidewalk=false;
         }
         if(quadR>0) terR=true; else terR=false;
 
@@ -472,6 +474,9 @@ public class Bezier : MonoBehaviour {
                 terOffsetR = (nodeStart.width/2)*right;
                 uvs.Add(new Vector2(0,i/(nodeStart.length/nodeStart.segmentNum)));
                 uvs.Add(new Vector2(1,i/(nodeStart.length/nodeStart.segmentNum)));
+            }
+            if(hasSidewalk) {
+                print("👴有人行道");
             }
 
             if(terL) {

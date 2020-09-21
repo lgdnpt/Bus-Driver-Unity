@@ -69,22 +69,19 @@ public class MBDLoader : MonoBehaviour {
 
 
     void LoadRoad(MbdFile.Road road) {
-
         //开头node
         Node nodeStart = mbd.GetNode(road.startIndex);
-        Vector3 pos = nodeStart.Position;
         GameObject root = new GameObject("root_" + nodeStart.thisOrigin);
-        Bezier bz = root.AddComponent<Bezier>();
-
-        root.transform.position=pos;
+        root.transform.position=nodeStart.Position;
 
         GameObject item = new GameObject("road_" + nodeStart.thisOrigin);
-        item.transform.position = pos;
+        item.transform.position = nodeStart.Position;
         item.transform.rotation = Quaternion.FromToRotation(Vector3.right, nodeStart.Direction);
         item.transform.parent=root.transform;
 
+        Bezier bz = root.AddComponent<Bezier>();
         bz.nodeStart = new Bezier.BezierNode {
-            position = pos,
+            position = nodeStart.Position,
             tangent=nodeStart.direction.GetVector()
         };
 
@@ -92,7 +89,7 @@ public class MBDLoader : MonoBehaviour {
         bz.nodeStart.length = road1.tangent/3;
         bz.nodeStart.width = (G.I.loadWorld.road[road1.roadNum].roadSize + G.I.loadWorld.road[road1.roadNum].roadOffset) * 2;
         bz.nodeStart.road = road1;
-        if(G.GetFlag(road1.flag,0x01000000)) {
+        if(G.GetFlag(road1.flag,(uint)MbdFile.Road.Flag.HalfRoadStep)) {
             //平滑
             bz.nodeStart.segmentNum = System.Math.Max((uint)(bz.nodeStart.length*0.4f),1);
         } else {
@@ -101,20 +98,18 @@ public class MBDLoader : MonoBehaviour {
 
         //结尾node
         Node nodeEnd = mbd.GetNode(road.endIndex);
-        Vector3 pos2 = nodeEnd.Position;
 
         GameObject item2 = new GameObject("road_"+nodeEnd.thisOrigin);
-        item2.transform.position=pos2;
+        item2.transform.position=nodeEnd.Position;
         item2.transform.rotation = Quaternion.FromToRotation(Vector3.right,nodeEnd.Direction);
         item2.transform.parent=root.transform;
 
         bz.nodeEnd=new Bezier.BezierNode {
-            position = pos2,
-            tangent=nodeEnd.direction.GetVector()
+            position = nodeEnd.Position,
+            tangent = nodeEnd.direction.GetVector()
         };
 
         bz.show=true;
-
         bz.UpdateMeshWithTerrain();
     }
 

@@ -170,6 +170,37 @@ namespace fs {
             public override string ToString() {
                 return string.Format("Road(编号:{0:g},材质:{1:g}",roadNum,matNum);
             }
+
+            public enum Flag:uint {
+                LeftNoise50 = 0x01,
+                LeftNoise00 = 0x02,
+                RightNoise50 = 0x04,
+                RightNoise00 = 0x08,
+                LeftTrans8 = 0x10,
+                LeftTrans4 = 0x20,
+                RightTrans8 = 0x40,
+                RightTrans4 = 0x80,
+
+                LeftSidewalk12 = 0x0100,
+                LeftSidewalk02 = 0x0200,
+                RightSidewalk12 = 0x0400,
+                RightSidewalk02 = 0x0800,
+                NoRandomSign = 0x2000,   //无随机物体?
+                Cracks = 0x4000,
+
+                Terrain = 0x010000,  //TODO: 道路模型 or 模型 ? railing/model
+                RightShiftModels = 0x020000,
+                LeftShiftModels = 0x040000,
+                CityRoad = 0x080000,
+                RightInvertRailing = 0x100000,
+                LeftInvertRailing = 0x200000,
+                NoTraffic = 0x400000,
+
+                HalfRoadStep = 0x01000000,
+                ShowInUiMap = 0x02000000,  //关gps?
+                NoSpeedSigns = 0x04000000, //无随机标志?
+                NoBoundary = 0x08000000
+            }
         }
 
         public class RoadData {
@@ -261,6 +292,28 @@ namespace fs {
                     text1=br.ReadUInt64();
                     text2=br.ReadUInt64();
                 }
+            }
+
+            public enum Flag {
+                _1Left = 0x01,
+                _1Right = 0x02,
+                _2Left = 0x04,
+                _2Right = 0x08,
+                _3Left = 0x10,
+                _3Right = 0x20,
+
+                _1N = 0x0100,
+                _1E = 0x0200,
+                _1W = 0x0400,
+                _2N = 0x1000,
+                _2E = 0x2000,
+                _2W = 0x4000,
+
+                _3N = 0x010000,
+                _3E = 0x020000,
+                _3W = 0x040000,
+
+                FollowRoad = 0x01000000
             }
         }
         public class BrushData {
@@ -564,6 +617,14 @@ namespace fs {
             直线移动 10 0001 0000
             曲线移动 01 0000 0001
             */
+            public enum Flag {
+                UseCurve = 0x01,
+                ActiveDay = 0x02,
+                ActiveNight = 0x04,
+                BounceAtEnd = 0x08,
+                FollowDir = 0x10
+            }
+
             public Mover() : this(0x00) { }
             public Mover(uint index) {
                 nodeType = (OriginType)0x08;
