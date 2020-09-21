@@ -47,9 +47,9 @@ namespace fs {
                 Read(br);
                 br.Close();
             } catch(FileNotFoundException e) {
-                Debug.LogWarning("[fs] Unable to open file for reading. ("+path+") |"+e);
+                Debug.LogWarning("[fs] Unable to open file for reading. ("+path+") |"+e.Message);
             } catch(DirectoryNotFoundException e) {
-                Debug.LogWarning("[fs] Unable to open directroy for reading. ("+path+") |"+e);
+                Debug.LogWarning("[fs] Unable to open directroy for reading. ("+path+") |"+e.Message);
             } catch(Exception e) {
                 Debug.LogError("[tobj] Can not open '"+path+"' |"+e.Message);
             }

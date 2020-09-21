@@ -88,7 +88,7 @@ public class MBDLoader : MonoBehaviour {
         MbdFile.Road road1 = (MbdFile.Road)mbd.origins[nodeStart.thisOrigin];
         bz.nodeStart.length = road1.tangent/3;
         bz.nodeStart.width = (G.I.loadWorld.road[road1.roadNum].roadSize + G.I.loadWorld.road[road1.roadNum].roadOffset) * 2;
-        bz.nodeStart.road = road1;
+        bz.road = road1;
         if(G.GetFlag(road1.flag,(uint)MbdFile.Road.Flag.HalfRoadStep)) {
             //平滑
             bz.nodeStart.segmentNum = System.Math.Max((uint)(bz.nodeStart.length*0.4f),1);
