@@ -11,7 +11,10 @@ public class LoadWorld : MonoBehaviour {
     public GameObject[] prefab;
     public RoadLook[] road;
     public TerrainProfile[] terProfile;
+    public Material[] roadMats;
+    public Material[] roadSideMats;
     public Material[] terMats;
+    public Material[] sidewalkMats;
 
     private fs.DefReader def;
     private string temp;
@@ -92,10 +95,47 @@ public class LoadWorld : MonoBehaviour {
     IEnumerator LoadRoadLook() {
         Debug.Log("Loading road data ....");
         def = new fs.DefReader(G.BasePath + "/def/world/road.def");
+
+        //加载路面/路牙材质
+        def.keys.TryGetValue("material_count", out temp);
+        int materialCount = int.Parse(temp);
+        roadMats = new Material[materialCount];
+        roadSideMats = new Material[materialCount];
+        for(int i = 0; i<materialCount; i++) {
+            def.keys.TryGetValue("material"+i, out temp);
+            if(temp.Equals("\"\"")) {
+                continue;
+            }
+            temp=temp.Substring(1, temp.Length-2).Trim();
+            string[] temps = temp.Split('|');
+            if(temps.Length!=2) {
+                Debug.LogError("[def] 道路材质"+i+"数据错误");
+                continue;
+            }
+            roadMats[i] = fs.Cache.LoadMat(temps[0].Trim()).Material;
+            roadSideMats[i] = fs.Cache.LoadMat(temps[1].Trim()).Material;
+
+            yield return null;
+        }
+
+        //加载人行道材质
+        def.keys.TryGetValue("sidewalk_material_count", out temp);
+        int sidewalkCount = int.Parse(temp);
+        sidewalkMats = new Material[sidewalkCount];
+        for(int i = 0; i<sidewalkCount; i++) {
+            def.keys.TryGetValue("sidewalk"+i, out temp);
+            if(temp.Equals("\"\"")) {
+                continue;
+            }
+            temp=temp.Trim().Substring(1, temp.Length-2).Trim();
+            sidewalkMats[i] = fs.Cache.LoadMat(temp).Material;
+            yield return null;
+        }
+
+        //加载道路样式
         def.keys.TryGetValue("road_look_count",out temp);
         int roadLookCount = int.Parse(temp);
-        road=new RoadLook[roadLookCount];
-
+        road = new RoadLook[roadLookCount];
         for(int i = 0;i<roadLookCount;i++) {
             def.keys.TryGetValue("road_look_data"+i,out temp);
             if(temp.Equals("\"\"")) {
@@ -103,7 +143,10 @@ public class LoadWorld : MonoBehaviour {
             }
             temp=temp.Substring(1,temp.Length-2).Trim();
             string[] temps = temp.Split(';');
-            if(temps.Length!=12) Debug.LogError("道路"+i+"数据错误");
+            if(temps.Length!=12) {
+                Debug.LogError("[def] 道路样式"+i+"数据错误");
+                continue;
+            }
             road[i]=new RoadLook(temps);
             yield return null;
         }

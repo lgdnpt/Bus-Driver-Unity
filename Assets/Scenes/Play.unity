@@ -724,7 +724,10 @@ MonoBehaviour:
   dropdown: {fileID: 0}
   model: []
   prefab: []
+  roadMats: []
+  roadSideMats: []
   terMats: []
+  sidewalkMats: []
 --- !u!4 &932796661
 Transform:
   m_ObjectHideFlags: 0
@@ -1076,30 +1079,6 @@ PrefabInstance:
       propertyPath: loadWorld
       value: 
       objectReference: {fileID: 932796660}
-    - target: {fileID: 6743356006323314760, guid: 89d1ec04fc405284e8451d5754a0b7c6, type: 3}
-      propertyPath: dif
-      value: 
-      objectReference: {fileID: 2100000, guid: 08efc370e62f7c14586e005c356db829, type: 2}
-    - target: {fileID: 6743356006323314760, guid: 89d1ec04fc405284e8451d5754a0b7c6, type: 3}
-      propertyPath: dif_a_decal_over
-      value: 
-      objectReference: {fileID: 2100000, guid: f33b6e6c82bc5474da636e766905545c, type: 2}
-    - target: {fileID: 6743356006323314760, guid: 89d1ec04fc405284e8451d5754a0b7c6, type: 3}
-      propertyPath: dif_spec
-      value: 
-      objectReference: {fileID: 2100000, guid: 92acecb94926651469925c2ce593e8d8, type: 2}
-    - target: {fileID: 6743356006323314760, guid: 89d1ec04fc405284e8451d5754a0b7c6, type: 3}
-      propertyPath: dif_spec_add_env
-      value: 
-      objectReference: {fileID: 2100000, guid: e3a549cd36a91cb4f9aeb11aba4115e0, type: 2}
-    - target: {fileID: 6743356006323314760, guid: 89d1ec04fc405284e8451d5754a0b7c6, type: 3}
-      propertyPath: none_spec_add_env
-      value: 
-      objectReference: {fileID: 2100000, guid: f90d8e686a0dd544fba1558c3691a7e2, type: 2}
-    - target: {fileID: 6743356006323314760, guid: 89d1ec04fc405284e8451d5754a0b7c6, type: 3}
-      propertyPath: not_found
-      value: 
-      objectReference: {fileID: 2100000, guid: c472bb33e413b59449486ba737f6faf6, type: 2}
     - target: {fileID: 6743356006323314761, guid: 89d1ec04fc405284e8451d5754a0b7c6, type: 3}
       propertyPath: m_Name
       value: G

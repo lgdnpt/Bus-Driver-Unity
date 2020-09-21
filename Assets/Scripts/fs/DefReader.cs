@@ -40,10 +40,15 @@ namespace fs {
         }
 
         public Encoding GetEncoding(string filePath) {
-            FileStream fs = new FileStream(filePath,FileMode.Open,FileAccess.Read);
-            Encoding r = GetType(fs);
-            fs.Close();
-            return r;
+            try { 
+                FileStream fs = new FileStream(filePath,FileMode.Open,FileAccess.Read);
+                Encoding r = GetType(fs);
+                fs.Close();
+                return r;
+            } catch(Exception e) {
+                UnityEngine.Debug.LogError(e+" | "+filePath);
+                return Encoding.GetEncoding("GBK");
+            }
         }
         public Encoding GetType(Stream fs) {
             byte[] Unicode = new byte[] { 0xFF,0xFE,0x41 };
