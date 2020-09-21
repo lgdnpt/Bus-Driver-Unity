@@ -155,7 +155,6 @@ public class LoadWorld : MonoBehaviour {
             yield return null;
         }
 
-
         //读取地形配置
         def.keys.TryGetValue("profile_count",out temp);
         int count = int.Parse(temp);
@@ -179,7 +178,6 @@ public class LoadWorld : MonoBehaviour {
             }
             yield return null;
         }
-        //Debug.LogWarning(terProfile.Length);
     }
     public struct TerrainProfile {
         public string name;

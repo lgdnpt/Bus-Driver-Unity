@@ -8,6 +8,9 @@ public class MBDLoader : MonoBehaviour {
 
     void Update() {
         if(Input.GetKeyDown(KeyCode.P)) {
+            StartCoroutine("LoadMBD200");
+        }
+        if(Input.GetKeyDown(KeyCode.O)) {
             StartCoroutine("LoadMBD");
         }
         if(Input.GetKeyDown(KeyCode.Q)) {
@@ -21,12 +24,28 @@ public class MBDLoader : MonoBehaviour {
         mbd = new MbdFile(G.BasePath + path);
         Debug.Log(mbd.originCount);
         Debug.Log(mbd.nodeCount);
-        for(uint i = 0;i<200/*mbd.originCount*/;i++) {//mbd.originCount
+        for(uint i = 0;i<mbd.originCount;i++) {
             switch(mbd.origins[i].nodeType) {
                 //case OriginType.Model: LoadModel((MbdFile.Model)mbd.origins[i]); break;
                 //case OriginType.MissionModel: LoadMissionModel((MbdFile.MissionModel)mbd.origins[i]); break;
                 case OriginType.Road: LoadRoad((MbdFile.Road)mbd.origins[i]); break;
                 //case OriginType.Prefab: LoadPrefab((MbdFile.Prefab)mbd.origins[i]); break;
+            }
+            yield return null;
+        }
+        Debug.Log("加载完成");
+    }
+    IEnumerator LoadMBD200() {
+        string path = "/map/bus1.mbd";
+        mbd = new MbdFile(G.BasePath + path);
+        Debug.Log(mbd.originCount);
+        Debug.Log(mbd.nodeCount);
+        for(uint i = 0;i<200/*mbd.originCount*/;i++) {//mbd.originCount
+            switch(mbd.origins[i].nodeType) {
+                //case OriginType.Model: LoadModel((MbdFile.Model)mbd.origins[i]); break;
+                //case OriginType.MissionModel: LoadMissionModel((MbdFile.MissionModel)mbd.origins[i]); break;
+                case OriginType.Road: LoadRoad((MbdFile.Road)mbd.origins[i]); break;
+                    //case OriginType.Prefab: LoadPrefab((MbdFile.Prefab)mbd.origins[i]); break;
             }
             yield return null;
         }
@@ -50,26 +69,19 @@ public class MBDLoader : MonoBehaviour {
 
 
     void LoadRoad(MbdFile.Road road) {
-        uint i = mbd.nodes[road.startIndex].thisOrigin;
-
-
-        GameObject root = new GameObject("root_"+i);
-        Bezier bz = root.AddComponent<Bezier>();
-        //bz.controlPoints=new Transform[2];
-        //bz.nodes=new Bezier.BezierNode[2];
 
 
         //开头node
         Node nodeStart = mbd.GetNode(road.startIndex);
         Vector3 pos = nodeStart.Position;
+        GameObject root = new GameObject("root_" + nodeStart.thisOrigin);
+        Bezier bz = root.AddComponent<Bezier>();
 
         root.transform.position=pos;
 
-        GameObject item = new GameObject("road_"+nodeStart.thisOrigin);
+        GameObject item = new GameObject("road_" + nodeStart.thisOrigin);
         item.transform.position = pos;
         item.transform.rotation = Quaternion.FromToRotation(Vector3.right, nodeStart.Direction);
-
-        //print(nodeStart.Direction);
         item.transform.parent=root.transform;
 
         bz.nodeStart = new Bezier.BezierNode {
@@ -101,10 +113,6 @@ public class MBDLoader : MonoBehaviour {
             position = pos2,
             tangent=nodeEnd.direction.GetVector()
         };
-        bz.nodeEnd.length = bz.nodeStart.length;
-        bz.nodeEnd.width = bz.nodeStart.width;
-        bz.nodeEnd.road = bz.nodeStart.road;
-        bz.nodeEnd.segmentNum=bz.nodeStart.segmentNum;
 
         bz.show=true;
 
