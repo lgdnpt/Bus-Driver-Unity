@@ -45,3 +45,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   flowControl: {fileID: 0}
   loadWorld: {fileID: 0}
+  dif: {fileID: 2100000, guid: 08efc370e62f7c14586e005c356db829, type: 2}
+  dif_spec: {fileID: 2100000, guid: 92acecb94926651469925c2ce593e8d8, type: 2}
+  dif_spec_add_env: {fileID: 2100000, guid: e3a549cd36a91cb4f9aeb11aba4115e0, type: 2}
+  none_spec_add_env: {fileID: 2100000, guid: f90d8e686a0dd544fba1558c3691a7e2, type: 2}
+  dif_a_decal_over: {fileID: 2100000, guid: f33b6e6c82bc5474da636e766905545c, type: 2}
+  not_found: {fileID: 2100000, guid: c472bb33e413b59449486ba737f6faf6, type: 2}

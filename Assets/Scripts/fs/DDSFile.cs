@@ -81,6 +81,7 @@ namespace fs {
 
                 texture2 = FlipTexture(texture2);
                 if(compress) texture2.Compress(true);
+                texture2.anisoLevel = 4;
                 Texture = texture2;
                 /*if(yMirror) {
                 } else {

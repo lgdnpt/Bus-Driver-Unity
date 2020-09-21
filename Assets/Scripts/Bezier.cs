@@ -470,14 +470,14 @@ public class Bezier : MonoBehaviour {
                 vertices.Add(rightV);
                 terOffsetL = -(nodeStart.width/2)*right;
                 terOffsetR = (nodeStart.width/2)*right;
-                uvs.Add(new Vector2(0,i%2==0 ? 0 : 1));
-                uvs.Add(new Vector2(1,i%2==0 ? 0 : 1));
+                uvs.Add(new Vector2(0,i/(nodeStart.length/nodeStart.segmentNum)));
+                uvs.Add(new Vector2(1,i/(nodeStart.length/nodeStart.segmentNum)));
             }
 
             if(terL) {
                 //生成地形网格点 左
                 verticesL.Add(thisPos + terOffsetL);
-                uvsL.Add(new Vector2((thisPos + terOffsetL).x,(thisPos + terOffsetL).z));
+                uvsL.Add(new Vector2((thisPos + terOffsetL).x*0.5f,(thisPos + terOffsetL).z*0.5f));
                 step = 0;
                 for(int j = 1;j<=quadL;j++) {
                     //地形网格从内到外
@@ -486,14 +486,14 @@ public class Bezier : MonoBehaviour {
                     else height = profileL.height[Mathf.Min(j,profileL.height.Length-1)];
                     pos = thisPos + terOffsetL - step*right + nodeStart.road.dataLeft.terrCoef * height * Vector3.up;
                     verticesL.Add(pos);
-                    uvsL.Add(new Vector2(pos.x,pos.z));
+                    uvsL.Add(new Vector2(pos.x*0.5f,pos.z*0.5f));
                 }
             }
 
             if(terR) {
                 //生成地形网格点 右
                 verticesR.Add(thisPos + terOffsetR);
-                uvsR.Add(new Vector2((thisPos + terOffsetR).x,(thisPos + terOffsetR).z));
+                uvsR.Add(new Vector2((thisPos + terOffsetR).x*0.5f,(thisPos + terOffsetR).z*0.5f));
                 step = 0;
                 for(int j = 1;j<=quadR;j++) {
                     //地形网格从内到外
@@ -503,7 +503,7 @@ public class Bezier : MonoBehaviour {
 
                     pos = thisPos + terOffsetR + step*right + nodeStart.road.dataRight.terrCoef * height * Vector3.up;
                     verticesR.Add(pos);
-                    uvsR.Add(new Vector2(pos.x,pos.z));
+                    uvsR.Add(new Vector2(pos.x*0.5f,pos.z*0.5f));
                 }
             }
 
