@@ -20,7 +20,7 @@ namespace fs {
             } catch(FileNotFoundException e) {
                 Debug.LogError("[fs] Unable to open file for reading. ("+path+") |"+e);
             } catch(Exception e) {
-                Debug.LogError("[dds] Can not load '"+path+"' |"+e);
+                Debug.LogError("[dds] Can not load '"+path+"' |"+e.Message);
             }
         }
 

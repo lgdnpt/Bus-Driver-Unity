@@ -201,7 +201,7 @@ public class Bezier : MonoBehaviour {
     }
     
 
-    public void UpadteTerrain(Material mat) {
+    public void UpadteTerrain2(Material mat) {
         GameObject terrain = new GameObject("terrain");
         //terrain.transform.position = transform.position;
         terrain.transform.parent = transform;
@@ -319,7 +319,7 @@ public class Bezier : MonoBehaviour {
         terrain.AddComponent<MeshCollider>();
     }
 
-    public void UpadteTerrain2(Material mat) {
+    public void UpadteTerrain(Material mat, bool isRight=true) {
         ushort quad = nodeStart.road.dataRight.terrQuad;
         if(quad<=0) return;
         LoadWorld.TerrainProfile profile = G.I.loadWorld.terProfile[nodeStart.road.dataRight.terrType];
@@ -399,5 +399,202 @@ public class Bezier : MonoBehaviour {
         terrain.AddComponent<MeshFilter>().mesh = mesh;
         terrain.AddComponent<MeshRenderer>().material = mat;
         terrain.AddComponent<MeshCollider>();
+    }
+
+    public void UpdateMeshWithTerrain() {
+        bool terL, terR, hasRoad;
+        ushort quadL = nodeStart.road.dataLeft.terrQuad;
+        ushort quadR = nodeStart.road.dataRight.terrQuad;
+
+        if(G.GetFlag(nodeStart.road.flag,0x00010000)) { 
+            //仅地形，禁用左地形
+            hasRoad=false; 
+            terL=false;
+        } else {
+            //道路
+            hasRoad=true;
+            if(quadL>0) terL=true; else terL=false;
+        }
+        if(quadR>0) terR=true; else terR=false;
+
+
+        List<Vector3> vertices = hasRoad ? new List<Vector3>() : null;
+        List<Vector2> uvs = hasRoad ? new List<Vector2>() : null;
+        List<int> triangles = hasRoad ? new List<int>() : null;
+
+        List<Vector3> verticesL = terL ? new List<Vector3>() : null;
+        List<Vector2> uvsL = terL ? new List<Vector2>() : null;
+        List<int> trianglesL = terL ? new List<int>() : null;
+
+        List<Vector3> verticesR = terR ? new List<Vector3>() : null;
+        List<Vector2> uvsR = terR ? new List<Vector2>() : null;
+        List<int> trianglesR = terR ? new List<int>() : null;
+
+        Vector3 leftV, rightV;
+
+        Vector3 thisPos;    //曲线上的点
+        Vector3 fwd, right; //方向向量
+        
+        Vector3 c1 = nodeStart.position + nodeStart.tangent * nodeStart.length;
+        Vector3 c2 = nodeEnd.position - nodeEnd.tangent * nodeStart.length;
+
+        //地形相关
+        Vector3 pos;   //地形网格点位置
+        Vector3 terOffsetL, terOffsetR; //地形偏移
+        float step, height;
+        LoadWorld.TerrainProfile profileL = G.I.loadWorld.terProfile[nodeStart.road.dataLeft.terrType];
+        LoadWorld.TerrainProfile profileR = G.I.loadWorld.terProfile[nodeStart.road.dataRight.terrType];
+
+        for(int i = 0;i <= nodeStart.segmentNum;i++) {
+            //每段从头到尾
+            if(i == 0) {
+                thisPos = nodeStart.position - transform.position;
+                fwd = nodeStart.tangent;
+            } else if(i == nodeStart.segmentNum) {
+                thisPos = nodeEnd.position - transform.position;
+                fwd = nodeEnd.tangent;
+            } else {
+                float t = i / (float)nodeStart.segmentNum;
+                thisPos = CalculateBezierPoint(nodeStart.position,nodeEnd.position,c1,c2,t)-transform.position;
+                fwd = CalculateBezierTangent(nodeStart.position,nodeEnd.position,c1,c2,t);
+            }
+            right = Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up) * fwd,Vector3.up).normalized;
+
+            terOffsetL = Vector3.zero;
+            terOffsetR = Vector3.zero;
+            if(hasRoad) {
+                //生成路面网格点
+                leftV = thisPos - (nodeStart.width/2)*right;
+                rightV = thisPos + (nodeStart.width/2)*right;
+                vertices.Add(leftV);
+                vertices.Add(rightV);
+                terOffsetL = -(nodeStart.width/2)*right;
+                terOffsetR = (nodeStart.width/2)*right;
+                uvs.Add(new Vector2(0,i%2==0 ? 0 : 1));
+                uvs.Add(new Vector2(1,i%2==0 ? 0 : 1));
+            }
+
+            if(terL) {
+                //生成地形网格点 左
+                verticesL.Add(thisPos + terOffsetL);
+                uvsL.Add(new Vector2(thisPos.x,thisPos.z));
+                step = 0;
+                for(int j = 1;j<=quadL;j++) {
+                    //地形网格从内到外
+                    step += profileL.step[Mathf.Min(j-1,profileL.step.Length-1)];
+                    if(j>profileL.height.Length) height=0;
+                    else height = profileL.height[Mathf.Min(j,profileL.height.Length-1)];
+                    pos = thisPos + terOffsetL - step*right + nodeStart.road.dataLeft.terrCoef * height * Vector3.up;
+                    verticesL.Add(pos);
+                    uvsL.Add(new Vector2(pos.x,pos.z));
+                }
+            }
+
+            if(terR) {
+                //生成地形网格点 右
+                verticesR.Add(thisPos + terOffsetR);
+                uvsR.Add(new Vector2(thisPos.x,thisPos.z));
+                step = 0;
+                for(int j = 1;j<=quadR;j++) {
+                    //地形网格从内到外
+                    step += profileR.step[Mathf.Min(j-1,profileR.step.Length-1)];
+                    if(j>profileR.height.Length) height=0;
+                    else height = profileR.height[Mathf.Min(j,profileR.height.Length-1)];
+
+                    pos = thisPos + terOffsetR + step*right + nodeStart.road.dataRight.terrCoef * height * Vector3.up;
+                    verticesR.Add(pos);
+                    uvsR.Add(new Vector2(pos.x,pos.z));
+                }
+            }
+
+        }
+
+        //连接路面三角形
+        int terIndex;
+        for(int index = 1; index<=nodeStart.segmentNum; index++) {
+            if(hasRoad) {
+                triangles.Add(index*2);
+                triangles.Add(index*2 +1);
+                triangles.Add(index*2 -2);
+                triangles.Add(index*2 +1);
+                triangles.Add(index*2 -1);
+                triangles.Add(index*2 -2);
+            }
+
+            if(terL) {
+                //连接地形三角形 左
+                for(int j = 1;j<=quadL;j++) {
+                    terIndex = j + index * (quadL+1);
+                    trianglesL.Add(terIndex);        //4
+                    trianglesL.Add(terIndex-1);      //3
+                    trianglesL.Add(terIndex-quadL-2);//0
+                    trianglesL.Add(terIndex);        //4
+                    trianglesL.Add(terIndex-quadL-2);//0
+                    trianglesL.Add(terIndex-quadL-1);//1
+                }
+            }
+            if(terR) {
+                //连接地形三角形 右
+                for(int j = 1;j<=quadR;j++) {
+                    terIndex = j + index * (quadR+1);
+                    trianglesR.Add(terIndex);        //4
+                    trianglesR.Add(terIndex-quadR-2);//0
+                    trianglesR.Add(terIndex-1);      //3
+                    trianglesR.Add(terIndex);        //4
+                    trianglesR.Add(terIndex-quadR-1);//1
+                    trianglesR.Add(terIndex-quadR-2);//0
+                }
+            }
+        }
+
+        if(hasRoad) {
+            Mesh meshBase = new Mesh {
+                name=gameObject.name,
+                vertices = vertices.ToArray(),
+                uv = uvs.ToArray(),
+                triangles = triangles.ToArray() //三角面
+            };
+            meshBase.RecalculateNormals();  //计算法线
+            filterBase=gameObject.AddComponent<MeshFilter>();
+            renderBase=gameObject.AddComponent<MeshRenderer>();
+            filterBase.mesh = meshBase;
+            renderBase.material = G.I.dif;
+            gameObject.AddComponent<MeshCollider>();
+        }
+
+        if(terL) {
+            Material matL = G.I.loadWorld.terMats[nodeStart.road.dataLeft.terrMatNum];
+            GameObject terrainL = new GameObject("terrainL");
+            terrainL.transform.parent = transform;
+            terrainL.transform.localPosition=Vector3.zero;
+            Mesh meshL = new Mesh {
+                name=terrainL.name,
+                vertices = verticesL.ToArray(),
+                uv = uvsL.ToArray(),
+                triangles = trianglesL.ToArray()
+            };
+            meshL.Optimize();
+            meshL.RecalculateNormals();
+            terrainL.AddComponent<MeshFilter>().mesh = meshL;
+            terrainL.AddComponent<MeshRenderer>().material = matL;
+            terrainL.AddComponent<MeshCollider>();
+        }
+        if(terR) {
+            Material matR = G.I.loadWorld.terMats[nodeStart.road.dataRight.terrMatNum];
+            GameObject terrainR = new GameObject("terrainR");
+            terrainR.transform.parent = transform;
+            terrainR.transform.localPosition=Vector3.zero;
+            Mesh meshR = new Mesh {
+                name=terrainR.name,
+                vertices = verticesR.ToArray(),
+                uv = uvsR.ToArray(),
+                triangles = trianglesR.ToArray()
+            };
+            meshR.Optimize();
+            meshR.RecalculateNormals();
+            terrainR.AddComponent<MeshFilter>().mesh = meshR;
+            terrainR.AddComponent<MeshRenderer>().material = matR;
+            terrainR.AddComponent<MeshCollider>();
+        }
     }
 }

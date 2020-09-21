@@ -48,8 +48,10 @@ namespace fs {
                 br.Close();
             } catch(FileNotFoundException e) {
                 Debug.LogWarning("[fs] Unable to open file for reading. ("+path+") |"+e);
+            } catch(DirectoryNotFoundException e) {
+                Debug.LogWarning("[fs] Unable to open directroy for reading. ("+path+") |"+e);
             } catch(Exception e) {
-                Debug.LogError("[tobj] Can not open '"+path+"' |"+e);
+                Debug.LogError("[tobj] Can not open '"+path+"' |"+e.Message);
             }
         }
         private void Read(BinaryReader br) {

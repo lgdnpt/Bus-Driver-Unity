@@ -108,12 +108,7 @@ public class MBDLoader : MonoBehaviour {
 
         bz.show=true;
 
-        if((road.flag & 0x00010000)==0x00010000) {
-            //i是地形
-            bz.UpadteTerrain2(G.I.loadWorld.terMats[road.matNum]);
-        } else {
-            bz.UpdateMesh();
-        }
+        bz.UpdateMeshWithTerrain();
     }
 
     void LoadPrefab(MbdFile.Prefab prefab) {
