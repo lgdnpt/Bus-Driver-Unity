@@ -47,9 +47,9 @@ namespace fs {
                 Read(br);
                 br.Close();
             } catch(FileNotFoundException e) {
-                Debug.LogWarning("找不到tobj:"+path+"\n"+e);
+                Debug.LogWarning("[fs] Unable to open file for reading. ("+path+") |"+e);
             } catch(Exception e) {
-                Debug.LogError("异常发生在tobj:"+path+"\n"+e);
+                Debug.LogError("[tobj] Can not open '"+path+"' |"+e);
             }
         }
         private void Read(BinaryReader br) {

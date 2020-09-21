@@ -38,6 +38,7 @@ namespace fs {
             try {
                 reader = new DefReader(G.BasePath + path);
             } catch(FileNotFoundException e) {
+                Debug.LogError("[fs] Unable to open file for reading. ("+path+") |"+e);
                 throw e;
             }
             string temp;
@@ -45,7 +46,7 @@ namespace fs {
                 reader.keys.TryGetValue("material",out temp);
                 shader=temp.Substring(1,temp.LastIndexOf('"')-1);
             } else {
-                Debug.LogError("mat格式错误");
+                Debug.LogError("[material] Can not open '"+path+"'");
                 return;
             }
 
