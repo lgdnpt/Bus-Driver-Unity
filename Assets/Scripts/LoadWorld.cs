@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,19 +16,18 @@ public class LoadWorld : MonoBehaviour {
     public Material[] roadSideMats;
     public Material[] terMats;
     public Material[] sidewalkMats;
+    public Railing[] railings;
 
     private fs.DefReader def;
     private string temp;
     GameObject lib;
-    void Start() {
-
-    }
 
     public void LoadAll() {
         lib = new GameObject("lib");
         
         //StartCoroutine("LoadModelCoroutine");
-        StartCoroutine("LoadRoadLook");
+        //StartCoroutine("LoadRoadLook");
+        StartCoroutine("LoadPrefabCoroutine");
         //LoadModel();
         //LoadPrefab();
         //LoadRoadLook();
@@ -225,8 +225,73 @@ public class LoadWorld : MonoBehaviour {
             }
             yield return null;
         }
-        //Debug.LogWarning(terProfile.Length);
+        StartCoroutine(nameof(LoadRailing));
     }
+
+    IEnumerator LoadRailing() {
+        Debug.Log("Loading railing data ....");
+        def = new fs.DefReader(G.BasePath + "/def/world/railing.def");
+
+        //读取地形材质
+        def.keys.TryGetValue("model_count", out temp);
+        int modelCount = int.Parse(temp);
+        railings = new Railing[modelCount];
+
+        GameObject obj;
+        Railing tempRailing;
+        for(int i = 0; i<modelCount; i++) {
+            def.keys.TryGetValue("model"+i, out temp);
+            temp = temp.Substring(1, temp.Length-2).Trim();
+
+            obj = new GameObject(temp);
+            obj.transform.parent = lib.transform;
+            PMGLoader.LoadPMG(temp, obj);
+            tempRailing = obj.AddComponent<Railing>();
+
+
+            GetRailing(tempRailing, "start5m", ref tempRailing.start5);
+            GetRailing(tempRailing, "startcol5m", ref tempRailing.startcol5);
+            GetRailing(tempRailing, "start15m", ref tempRailing.start15);
+            GetRailing(tempRailing, "startcol15m", ref tempRailing.startcol15);
+
+            GetRailing(tempRailing, "center5m", ref tempRailing.center5);
+            GetRailing(tempRailing, "centercol5m", ref tempRailing.centercol5);
+            GetRailing(tempRailing, "center15m", ref tempRailing.center15);
+            GetRailing(tempRailing, "centercol15m", ref tempRailing.centercol15);
+
+            GetRailing(tempRailing, "end5m", ref tempRailing.end5);
+            GetRailing(tempRailing, "endcol5m", ref tempRailing.endcol5);
+            GetRailing(tempRailing, "end15m", ref tempRailing.end15);
+            GetRailing(tempRailing, "endcol15m", ref tempRailing.endcol15);
+
+
+            railings[i] = tempRailing;
+            yield return null;
+        }
+
+    }
+
+    private Transform tempTransform;
+    private void GetRailing(Railing railing, string name, ref MeshFilter railMesh) {
+        tempTransform = railing.transform.Find(name);
+        if(tempTransform != null) {
+            railMesh = tempTransform.GetComponent<MeshFilter>();
+        } else {
+            //TODO 加载中段显示模型作为丢失部分碰撞体
+            Debug.LogWarning("[railing] Missing colbox for '" +railing.transform.name+ "' in " + name);
+
+            /*if(name.Contains("15m")) {
+                tempTransform = railing.transform.Find("center15m");
+                tempTransform = Instantiate(tempTransform, tempTransform.parent);
+            } else {
+                tempTransform = railing.transform.Find("center5m");
+                tempTransform = Instantiate(tempTransform, tempTransform.parent);
+            }
+            if(tempTransform != null) railMesh = tempTransform.GetComponent<MeshFilter>().mesh;
+            else Debug.LogError("[railing] Missing colbox for '" +railing.transform.name+ "' in " + name);*/
+        }
+    }
+
     public struct TerrainProfile {
         public string name;
         public float[] height;

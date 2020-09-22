@@ -191,7 +191,6 @@ public class Bezier : MonoBehaviour {
             widthR = road.SidewalkWidthR;
             if(widthL>0f) hasSideL=true;
             if(widthR>0f) hasSideR=true;
-            print("人行道 左:"+widthL+"\t|右"+widthR);
         }
 
         //地形相关
@@ -249,32 +248,48 @@ public class Bezier : MonoBehaviour {
                     meshRoad.Add(new Vector2(look.textureRight, i * segmentLength * 0.25f));
                 }
 
+                if(road.dataLeft.railNum != 0xFFFF) {
+                    //左边有railing
+                    float railOffset = road.dataLeft.railOffset;
+
+                    GameObject railingObj = Instantiate(G.I.loadWorld.railings[road.dataLeft.railNum].center5.gameObject, transform);
+                    railingObj.name = "railingLeft";
+                    //print(thisPos);
+                    railingObj.transform.position = thisPos+transform.position;
+                    railingObj.transform.rotation = Quaternion.FromToRotation(Vector3.forward, fwd);
+                    Mesh templateMesh = railingObj.GetComponent<MeshFilter>().mesh;
+
+                    for(int j = 0; j < templateMesh.vertexCount; j++) {
+                        templateMesh.vertices[j] -= railOffset * right;
+                    }
+                }
+
                 offsetL = -nodeStart.width/2*right;
                 offsetR = nodeStart.width/2*right;
                 if(hasSide) {
                     //左路牙
                     meshSide.Add(thisPos + offsetL);
                     meshSide.Add(new Vector2(1f, i * segmentLength *0.25f));
-                    offsetL -= 0.2f * right;
+                    offsetL -= 0.5f * right;
                     meshSide.Add(thisPos + offsetL);
                     meshSide.Add(new Vector2(0.66f, i * segmentLength *0.25f));
                     offsetL += 0.2f * Vector3.up;
                     meshSide.Add(thisPos + offsetL);
                     meshSide.Add(new Vector2(0.33f, i * segmentLength *0.25f));
-                    offsetL -= 0.2f * right;
+                    offsetL -= 0.5f * right;
                     meshSide.Add(thisPos + offsetL);
                     meshSide.Add(new Vector2(0f, i * segmentLength *0.25f));
 
                     //右路牙
                     meshSide.Add(thisPos + offsetR);
                     meshSide.Add(new Vector2(1f, i* segmentLength *0.25f));
-                    offsetR += 0.2f * right;
+                    offsetR += 0.5f * right;
                     meshSide.Add(thisPos + offsetR);
                     meshSide.Add(new Vector2(0.66f, i* segmentLength *0.25f));
                     offsetR += 0.2f * Vector3.up;
                     meshSide.Add(thisPos + offsetR);
                     meshSide.Add(new Vector2(0.33f, i* segmentLength *0.25f));
-                    offsetR += 0.2f * right;
+                    offsetR += 0.5f * right;
                     meshSide.Add(thisPos + offsetR);
                     meshSide.Add(new Vector2(0f, i* segmentLength *0.25f));
 

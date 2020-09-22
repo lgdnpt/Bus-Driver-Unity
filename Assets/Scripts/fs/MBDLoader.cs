@@ -38,14 +38,14 @@ public class MBDLoader : MonoBehaviour {
     IEnumerator LoadMBD200() {
         string path = "/map/bus1.mbd";
         mbd = new MbdFile(G.BasePath + path);
-        Debug.Log(mbd.originCount);
-        Debug.Log(mbd.nodeCount);
+        //Debug.Log(mbd.originCount);
+        //Debug.Log(mbd.nodeCount);
         for(uint i = 0;i<200/*mbd.originCount*/;i++) {//mbd.originCount
             switch(mbd.origins[i].nodeType) {
                 //case OriginType.Model: LoadModel((MbdFile.Model)mbd.origins[i]); break;
                 //case OriginType.MissionModel: LoadMissionModel((MbdFile.MissionModel)mbd.origins[i]); break;
                 case OriginType.Road: LoadRoad((MbdFile.Road)mbd.origins[i]); break;
-                    //case OriginType.Prefab: LoadPrefab((MbdFile.Prefab)mbd.origins[i]); break;
+                case OriginType.Prefab: LoadPrefab((MbdFile.Prefab)mbd.origins[i]); break;
             }
             yield return null;
         }
