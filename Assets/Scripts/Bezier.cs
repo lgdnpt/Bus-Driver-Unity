@@ -14,6 +14,7 @@ public class Bezier : MonoBehaviour {
         public float offset;
         //public MbdFile.Road road;
     }
+    
 
     public RoadType roadType;
 
@@ -150,6 +151,7 @@ public class Bezier : MonoBehaviour {
         ushort quadR = road.dataRight.terrQuad;
 
         float size=nodeStart.width, offset=0;
+        float segmentLength = road.tangent /nodeStart.segmentNum;
 
         hasRoad = !G.GetFlag(road.flag, (uint)MbdFile.Road.Flag.Terrain);
         if(hasRoad) {
@@ -198,6 +200,7 @@ public class Bezier : MonoBehaviour {
         float step, height;
         LoadWorld.TerrainProfile profileL = G.I.loadWorld.terProfile[road.dataLeft.terrType];
         LoadWorld.TerrainProfile profileR = G.I.loadWorld.terProfile[road.dataRight.terrType];
+        LoadWorld.RoadLook look = G.I.loadWorld.road[road.roadNum];
 
         //=====================================================
         //生成网格顶点
@@ -233,17 +236,17 @@ public class Bezier : MonoBehaviour {
                     meshRoad.Add(thisPos - (offset+size)*right);
                     meshRoad.Add(thisPos + offset*right);
                     meshRoad.Add(thisPos + (offset+size)*right);
-                    meshRoad.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
-                    meshRoad.Add(new Vector2(1, i/(nodeStart.length/nodeStart.segmentNum)));
-                    meshRoad.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
-                    meshRoad.Add(new Vector2(1, i/(nodeStart.length/nodeStart.segmentNum)));
+                    meshRoad.Add(new Vector2(look.textureLeft, i *segmentLength*0.25f));
+                    meshRoad.Add(new Vector2(look.textureRight, i *segmentLength*0.25f));
+                    meshRoad.Add(new Vector2(look.textureLeft, i *segmentLength*0.25f));
+                    meshRoad.Add(new Vector2(look.textureRight, i *segmentLength*0.25f));
 
                 } else {
                     //生成路面网格
                     meshRoad.Add(thisPos - (nodeStart.width/2)*right);
                     meshRoad.Add(thisPos + (nodeStart.width/2)*right);
-                    meshRoad.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
-                    meshRoad.Add(new Vector2(1, i/(nodeStart.length/nodeStart.segmentNum)));
+                    meshRoad.Add(new Vector2(look.textureLeft, i * segmentLength * 0.25f));
+                    meshRoad.Add(new Vector2(look.textureRight, i * segmentLength * 0.25f));
                 }
 
                 offsetL = -nodeStart.width/2*right;
@@ -251,40 +254,46 @@ public class Bezier : MonoBehaviour {
                 if(hasSide) {
                     //左路牙
                     meshSide.Add(thisPos + offsetL);
-                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
-                    offsetL += 0.2f * Vector3.up;
-                    meshSide.Add(thisPos + offsetL);
-                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                    meshSide.Add(new Vector2(1f, i * segmentLength *0.25f));
                     offsetL -= 0.2f * right;
                     meshSide.Add(thisPos + offsetL);
-                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                    meshSide.Add(new Vector2(0.66f, i * segmentLength *0.25f));
+                    offsetL += 0.2f * Vector3.up;
+                    meshSide.Add(thisPos + offsetL);
+                    meshSide.Add(new Vector2(0.33f, i * segmentLength *0.25f));
+                    offsetL -= 0.2f * right;
+                    meshSide.Add(thisPos + offsetL);
+                    meshSide.Add(new Vector2(0f, i * segmentLength *0.25f));
 
                     //右路牙
                     meshSide.Add(thisPos + offsetR);
-                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
-                    offsetR += 0.2f * Vector3.up;
-                    meshSide.Add(thisPos + offsetR);
-                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                    meshSide.Add(new Vector2(1f, i* segmentLength *0.25f));
                     offsetR += 0.2f * right;
                     meshSide.Add(thisPos + offsetR);
-                    meshSide.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                    meshSide.Add(new Vector2(0.66f, i* segmentLength *0.25f));
+                    offsetR += 0.2f * Vector3.up;
+                    meshSide.Add(thisPos + offsetR);
+                    meshSide.Add(new Vector2(0.33f, i* segmentLength *0.25f));
+                    offsetR += 0.2f * right;
+                    meshSide.Add(thisPos + offsetR);
+                    meshSide.Add(new Vector2(0f, i* segmentLength *0.25f));
 
                     //生成人行道
                     if(hasSideL) {
                         //左平面
                         meshSideLP.Add(thisPos + offsetL);
-                        meshSideLP.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                        meshSideLP.Add(new Vector2(0, i* segmentLength *0.25f));
                         offsetL -= widthL*right;
                         meshSideLP.Add(thisPos + offsetL);
-                        meshSideLP.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                        meshSideLP.Add(new Vector2(3, i* segmentLength *0.25f));
                     }
                     if(hasSideR) {
                         //右平面
                         meshSideRP.Add(thisPos + offsetR);
-                        meshSideRP.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                        meshSideRP.Add(new Vector2(3, i* segmentLength *0.25f));
                         offsetR += widthR*right;
                         meshSideRP.Add(thisPos + offsetR);
-                        meshSideRP.Add(new Vector2(0, i/(nodeStart.length/nodeStart.segmentNum)));
+                        meshSideRP.Add(new Vector2(0, i* segmentLength *0.25f));
                     }
                 }
             }
@@ -366,35 +375,49 @@ public class Bezier : MonoBehaviour {
 
                 if(hasSide) {
                     //连接人行道三角形
+                    //左_下面
+                    meshSide.Add(index*8 );
+                    meshSide.Add(index*8 -8);
+                    meshSide.Add(index*8 -7);
+                    meshSide.Add(index*8 );
+                    meshSide.Add(index*8 -7);
+                    meshSide.Add(index*8 +1);
                     //左_侧面
-                    meshSide.Add(index*6);
-                    meshSide.Add(index*6 -6);
-                    meshSide.Add(index*6 -5);
-                    meshSide.Add(index*6);
-                    meshSide.Add(index*6 -5);
-                    meshSide.Add(index*6 +1);
+                    meshSide.Add(index*8 +1);
+                    meshSide.Add(index*8 -7);
+                    meshSide.Add(index*8 -6);
+                    meshSide.Add(index*8 +1);
+                    meshSide.Add(index*8 -6);
+                    meshSide.Add(index*8 +2);
                     //左_上面
-                    meshSide.Add(index*6 +1);
-                    meshSide.Add(index*6 -5);
-                    meshSide.Add(index*6 -4);
-                    meshSide.Add(index*6 +1);
-                    meshSide.Add(index*6 -4);
-                    meshSide.Add(index*6 +2);
+                    meshSide.Add(index*8 +2);
+                    meshSide.Add(index*8 -6);
+                    meshSide.Add(index*8 -5);
+                    meshSide.Add(index*8 +2);
+                    meshSide.Add(index*8 -5);
+                    meshSide.Add(index*8 +3);
 
+                    //右_下面
+                    meshSide.Add(index*8 +5);
+                    meshSide.Add(index*8 -3);
+                    meshSide.Add(index*8 -4);
+                    meshSide.Add(index*8 +5);
+                    meshSide.Add(index*8 -4);
+                    meshSide.Add(index*8 +4);
                     //右_侧面
-                    meshSide.Add(index*6 +4);
-                    meshSide.Add(index*6 -2);
-                    meshSide.Add(index*6 -3);
-                    meshSide.Add(index*6 +4);
-                    meshSide.Add(index*6 -3);
-                    meshSide.Add(index*6 +3);
+                    meshSide.Add(index*8 +6);
+                    meshSide.Add(index*8 -2);
+                    meshSide.Add(index*8 -3);
+                    meshSide.Add(index*8 +6);
+                    meshSide.Add(index*8 -3);
+                    meshSide.Add(index*8 +5);
                     //右_上面
-                    meshSide.Add(index*6 +5);
-                    meshSide.Add(index*6 -1);
-                    meshSide.Add(index*6 -2);
-                    meshSide.Add(index*6 +5);
-                    meshSide.Add(index*6 -2);
-                    meshSide.Add(index*6 +4);
+                    meshSide.Add(index*8 +7);
+                    meshSide.Add(index*8 -1);
+                    meshSide.Add(index*8 -2);
+                    meshSide.Add(index*8 +7);
+                    meshSide.Add(index*8 -2);
+                    meshSide.Add(index*8 +6);
 
                     if(hasSideL) {
                         //左_延伸面
