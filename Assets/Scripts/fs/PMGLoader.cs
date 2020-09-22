@@ -16,18 +16,22 @@ public class PMGLoader : MonoBehaviour {
 
         //创建根物体
         for(int groupi = 0;groupi<pmg.groupCount;groupi++) {
-            GameObject group = new GameObject(pmg.groups[groupi].name.Text);
-            group.transform.parent=root.transform;
+            GameObject groupObj = new GameObject(pmg.groups[groupi].name.Text);
+            groupObj.transform.parent=root.transform;
 
             if(pmg.groups[groupi].meshCount>0) {
                 //读取mesh
                 for(int meshi=0;meshi<pmg.groups[groupi].meshCount;meshi++) {
                     //print("读取组:"+pmg.groups[groupi].name.Text);
                     string meshName = pmg.groups[groupi].name.Text+" "+meshi;
-                    GameObject meshObj = new GameObject(meshName);
-                    meshObj.transform.parent=group.transform;
 
-                    int meshID = pmg.groups[groupi].meshID+meshi;
+                    GameObject meshObj = groupObj;
+                    if(pmg.groups[groupi].meshCount>1 || pmg.groups[groupi].locatorCount>1) {
+                        meshObj = new GameObject(meshName);
+                        meshObj.transform.parent=groupObj.transform;
+                    }
+
+                    int meshID = pmg.groups[groupi].meshID + meshi;
 
 
 
@@ -60,38 +64,29 @@ public class PMGLoader : MonoBehaviour {
                     meshFilter.mesh = mesh;
 
                     //碰撞体
-                    if(pmg.groups[groupi].name.Text.Equals("coll")) {
-                        meshObj.AddComponent<MeshCollider>();
-                    } else if(pmg.groups[groupi].name.Text.Equals("wcoll")) {
-                        meshObj.AddComponent<MeshCollider>();
-                    } else if(pmg.groups[groupi].name.Text.Equals("coll1")) {
-                        meshObj.AddComponent<MeshCollider>();
-                    } else {
-                        //非碰撞体,读材质
-                        Material mat;
-                        int materialID = pmg.meshes[meshID].material;
-                        string matPath = pmd.matPath[materialID];
-                        if(matPath.IndexOf('/')<0) {
-                            matPath = pmdPath.Substring(0,pmdPath.LastIndexOf('/')+1) + matPath;
+                    switch(pmg.groups[groupi].name.Text) {
+                        case "coll": meshObj.AddComponent<MeshCollider>(); break;
+                        case "wcoll": meshObj.AddComponent<MeshCollider>(); break;
+                        case "coll1": meshObj.AddComponent<MeshCollider>(); break;
+                        case "centercol5m": meshObj.AddComponent<MeshCollider>(); break;
+                        case "centercol15m": meshObj.AddComponent<MeshCollider>(); break;
+                        case "startcol5m": meshObj.AddComponent<MeshCollider>(); break;
+                        case "startcol15m": meshObj.AddComponent<MeshCollider>(); break;
+                        case "endcol5m": meshObj.AddComponent<MeshCollider>(); break;
+                        case "endcol15m": meshObj.AddComponent<MeshCollider>(); break;
+                        default: {
+                            //非碰撞体,读材质
+                            int materialID = pmg.meshes[meshID].material;
+                            string matPath = pmd.matPath[materialID];
+                            if(matPath.IndexOf('/')<0) {
+                                matPath = pmdPath.Substring(0, pmdPath.LastIndexOf('/')+1) + matPath;
+                            }
+
+                            //读取/应用材质
+                            MeshRenderer renderer = meshObj.AddComponent<MeshRenderer>();
+                            renderer.material = fs.Cache.LoadMat(matPath).Material;
                         }
-                        //Debug.Log("读取材质:"+matPath);
-
-                        //读取材质
-                        mat = fs.Cache.LoadMat(matPath).Material;
-                        /*if(MatFile.lib.ContainsKey(matPath)) {
-                            //从库中取出
-                            MatFile.lib.TryGetValue(matPath,out mat);
-                        } else {
-                            //新建材质
-                            MatFile matFile = new MatFile(matPath);
-                            mat=matFile.GetMaterial();
-                            //添加到材质库
-                            MatFile.lib.Add(matPath,mat);
-                        }*/
-
-                        //应用材质
-                        MeshRenderer renderer = meshObj.AddComponent<MeshRenderer>();
-                        renderer.material = mat;
+                        break;
                     }
                 }
             }
@@ -100,7 +95,7 @@ public class PMGLoader : MonoBehaviour {
                 for(int i = 0;i<pmg.groups[groupi].locatorCount;i++) {
                     PmgFile.Locator locator = pmg.locators[pmg.groups[groupi].locatorID+i];
                     GameObject obj = new GameObject(locator.name.Text);
-                    obj.transform.parent=group.transform;
+                    obj.transform.parent=groupObj.transform;
                     obj.transform.localPosition=new Vector3(locator.position.x,locator.position.y,locator.position.z);
                     obj.transform.localRotation=Quaternion.Euler(locator.rotation.x,locator.rotation.y,locator.rotation.z);
                     obj.transform.localScale*=locator.scale;

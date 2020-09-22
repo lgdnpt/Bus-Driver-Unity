@@ -7,7 +7,7 @@ namespace fs {
     class PmgFile {
         //header
         public byte version;  //0x11
-        public byte[] signature = new byte[3];
+        public byte[] signature;// = new byte[3];
         public int meshCount;
         public int groupCount;
         public int boneCount;
@@ -46,9 +46,10 @@ namespace fs {
         }
         public void Read(BinaryReader br) {
             version=br.ReadByte();
-            for(int i = 0;i<3;i++) {
+            /*for(int i = 0;i<3;i++) {
                 signature[i]=br.ReadByte();
-            }
+            }*/
+            signature = br.ReadBytes(3);
             meshCount=br.ReadInt32();
             groupCount=br.ReadInt32();
             boneCount=br.ReadInt32();
@@ -73,9 +74,9 @@ namespace fs {
 
             padding=new byte[boneOffset-116];
             bones=new Bone[boneCount];
-            /*            for(int i = 0;i<boneCount;i++) {
-                            bones[i]=new Bone(br);
-                        }*/
+            /*for(int i = 0;i<boneCount;i++) {
+                bones[i]=new Bone(br);
+            }*/
 
             br.BaseStream.Seek(groupOffset,SeekOrigin.Begin);
             groups=new Group[groupCount];
@@ -265,7 +266,6 @@ namespace fs {
             }
 
             public void LoadVertix(BinaryReader br) {
-                //return;
                 //读顶点/法线
                 vertex=new Float3[vertsCount];
                 br.BaseStream.Seek(vertPositionOffset,SeekOrigin.Begin);
