@@ -37,6 +37,9 @@ public class LoadWorld : MonoBehaviour {
     public void Load() {
         PMGLoader.LoadPMG(modelList[dropdown.value]);
     }
+    public void Load(string path) {
+        PMGLoader.LoadPMG(path);
+    }
 
 
     IEnumerator LoadModelCoroutine() {

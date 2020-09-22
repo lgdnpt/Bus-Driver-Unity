@@ -218,7 +218,7 @@ public class Bezier : MonoBehaviour {
                 fwd = CalculateBezierTangent(nodeStart.position,nodeEnd.position,c1,c2,t);
             }
             right = Vector3.ProjectOnPlane(Quaternion.AngleAxis(90,Vector3.up) * fwd,Vector3.up).normalized;
-
+            
             offsetL = Vector3.zero;
             offsetR = Vector3.zero;
             if(hasRoad) {

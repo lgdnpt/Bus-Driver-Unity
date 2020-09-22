@@ -91,9 +91,11 @@ public class MBDLoader : MonoBehaviour {
         bz.road = road1;
         if(G.GetFlag(road1.flag,(uint)MbdFile.Road.Flag.HalfRoadStep)) {
             //平滑
-            bz.nodeStart.segmentNum = System.Math.Max((uint)(bz.nodeStart.length*0.4f),1);
+            //bz.nodeStart.segmentNum = System.Math.Max((uint)(bz.nodeStart.length*0.4f),1);
+            bz.nodeStart.segmentNum = System.Math.Max((uint)(road1.tangent/5f),1);  //5m
         } else {
-            bz.nodeStart.segmentNum = System.Math.Max((uint)(bz.nodeStart.length*0.2f),1);
+            //bz.nodeStart.segmentNum = System.Math.Max((uint)(bz.nodeStart.length*0.2f),1);
+            bz.nodeStart.segmentNum = System.Math.Max((uint)(road1.tangent/15f),1); //15m
         }
 
         //结尾node
