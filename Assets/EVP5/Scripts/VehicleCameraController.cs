@@ -353,25 +353,25 @@ public class VehicleCameraController : MonoBehaviour {
             if (enabled) { 
                 mode = Mode.AttachTo;
 				//self.rotation = GlobalClass.Instance.player.transform.rotation;
-				GlobalClass.Instance.player.SetVisible(false);
+				//GlobalClass.Instance.player.SetVisible(false);
             }
         }
         if (Input.GetKeyDown(GlobalClass.Instance.cameraKey.cameraOrbit)) {
             if (enabled) { 
                 mode = Mode.MouseOrbit;
-                GlobalClass.Instance.player.SetVisible(true);
+                //GlobalClass.Instance.player.SetVisible(true);
             }
         }
         if (Input.GetKeyDown(GlobalClass.Instance.cameraKey.cameraFollow)) {
             if (enabled) { 
                 mode = Mode.SmoothFollow;
-                GlobalClass.Instance.player.SetVisible(true);
+                //GlobalClass.Instance.player.SetVisible(true);
             }
         }
         if (Input.GetKeyDown(GlobalClass.Instance.cameraKey.cameraFixed)) {
             if (enabled) {
                 mode = Mode.LookAt;
-                GlobalClass.Instance.player.SetVisible(true);
+                //GlobalClass.Instance.player.SetVisible(true);
             }
         }
 

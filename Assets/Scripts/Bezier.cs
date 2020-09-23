@@ -171,9 +171,7 @@ public class Bezier : MonoBehaviour {
         MeshParams meshCenter = hasCenter ? new MeshParams() : null;
         MeshParams meshTerL = terL ? new MeshParams() : null;
         MeshParams meshTerR = terR ? new MeshParams() : null;
-        MeshParams meshSide = hasSide ? new MeshParams() : null;
-        MeshParams meshSideLP = hasSide ? new MeshParams() : null;
-        MeshParams meshSideRP = hasSide ? new MeshParams() : null;
+        MeshParams meshRailingL = (road.dataLeft.railNum != 0xFFFF) ? new MeshParams() : null;
         
         //曲线相关
         Vector3 thisPos;    //曲线上的点
@@ -192,6 +190,9 @@ public class Bezier : MonoBehaviour {
             if(widthL>0f) hasSideL=true;
             if(widthR>0f) hasSideR=true;
         }
+        MeshParams meshSide = hasSide ? new MeshParams() : null;
+        MeshParams meshSideLP = hasSideL ? new MeshParams() : null;
+        MeshParams meshSideRP = hasSideR ? new MeshParams() : null;
 
         //地形相关
         Vector3 pos;   //地形网格点位置

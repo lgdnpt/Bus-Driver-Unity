@@ -22,8 +22,7 @@ public class MBDLoader : MonoBehaviour {
     IEnumerator LoadMBD() {
         string path = "/map/bus1.mbd";
         mbd = new MbdFile(G.BasePath + path);
-        Debug.Log(mbd.originCount);
-        Debug.Log(mbd.nodeCount);
+
         for(uint i = 0;i<mbd.originCount;i++) {
             switch(mbd.origins[i].nodeType) {
                 //case OriginType.Model: LoadModel((MbdFile.Model)mbd.origins[i]); break;
@@ -31,15 +30,14 @@ public class MBDLoader : MonoBehaviour {
                 case OriginType.Road: LoadRoad((MbdFile.Road)mbd.origins[i]); break;
                 //case OriginType.Prefab: LoadPrefab((MbdFile.Prefab)mbd.origins[i]); break;
             }
-            yield return null;
+            if(i%5==0) yield return null;
         }
-        Debug.Log("加载完成");
+        Debug.Log("Map successfully loadded ....");
     }
     IEnumerator LoadMBD200() {
         string path = "/map/bus1.mbd";
         mbd = new MbdFile(G.BasePath + path);
-        //Debug.Log(mbd.originCount);
-        //Debug.Log(mbd.nodeCount);
+
         for(uint i = 0;i<200/*mbd.originCount*/;i++) {//mbd.originCount
             switch(mbd.origins[i].nodeType) {
                 //case OriginType.Model: LoadModel((MbdFile.Model)mbd.origins[i]); break;
@@ -47,9 +45,9 @@ public class MBDLoader : MonoBehaviour {
                 case OriginType.Road: LoadRoad((MbdFile.Road)mbd.origins[i]); break;
                 case OriginType.Prefab: LoadPrefab((MbdFile.Prefab)mbd.origins[i]); break;
             }
-            yield return null;
+            if(i%5==0) yield return null;
         }
-        Debug.Log("加载完成");
+        Debug.Log("Map successfully loadded ....");
     }
 
     void LoadModel(MbdFile.Model model) {
@@ -117,6 +115,7 @@ public class MBDLoader : MonoBehaviour {
 
     void LoadPrefab(MbdFile.Prefab prefab) {
         short nodeIndex = prefab.nodeIndex;
+        
 
         int isOrigin = 0;
         for(int i = 0;i<prefab.indexs.Length;i++) {

@@ -46,9 +46,6 @@ namespace fs {
         }
         public void Read(BinaryReader br) {
             version=br.ReadByte();
-            /*for(int i = 0;i<3;i++) {
-                signature[i]=br.ReadByte();
-            }*/
             signature = br.ReadBytes(3);
             meshCount=br.ReadInt32();
             groupCount=br.ReadInt32();
@@ -72,9 +69,9 @@ namespace fs {
             triangleOffset=br.ReadInt32();
             triangleSize=br.ReadInt32();
 
-            padding=new byte[boneOffset-116];
+            /*padding=new byte[boneOffset-116];
             bones=new Bone[boneCount];
-            /*for(int i = 0;i<boneCount;i++) {
+            for(int i = 0;i<boneCount;i++) {
                 bones[i]=new Bone(br);
             }*/
 
@@ -101,25 +98,6 @@ namespace fs {
             }
 
             br.Close();
-            //读顶点/法线
-            /*            
-            vertex=new Vector3[geometrySize/12];
-            br.BaseStream.Position=geometryOffset;
-            for(int i = 0;i<geometrySize/12;i++) {
-                vertex[i]=new Vector3(br);
-            }
-
-            uv=new byte[uvSize];
-            br.BaseStream.Position=uvOffset;
-            for(int i = 0;i<uvSize;i++) {
-                uv[i]=br.ReadByte();
-            }
-
-            br.BaseStream.Position=triangleOffset;
-            triangle=new ushort[triangleSize/2];
-            for(int i = 0;i<triangleSize/2;i++) {
-                triangle[i]=br.ReadUInt16();
-            }*/
         }
 
         public class Bone {
